@@ -1,0 +1,24 @@
+name: ai_saas
+channels:
+  - defaults
+  - conda-forge
+dependencies:
+  - python=3.11
+  - pip
+  - pip:
+      - langchain
+      - langchain-openai
+      - langchain-community
+      - chromadb
+      - openai
+      - fastapi
+      - uvicorn
+      - pypdf
+      - sentence-transformers
+      - python-dotenv
+      - tiktoken
+      - pydantic-settings
+
+# To recreate this env on any machine:
+# conda env create -f environment.yml
+# conda activate ai_saas
