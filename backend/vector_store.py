@@ -1,4 +1,9 @@
-from langchain_community.vectorstores import Chroma
+try:
+    # Preferred import in recent LangChain versions.
+    from langchain_chroma import Chroma
+except ModuleNotFoundError:
+    # Backward-compatible fallback for environments not yet migrated.
+    from langchain_community.vectorstores import Chroma
 
 try:
     from backend.config import settings

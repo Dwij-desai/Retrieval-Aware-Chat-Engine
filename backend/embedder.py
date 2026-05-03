@@ -1,5 +1,11 @@
-from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
+
+try:
+    # Preferred import in recent LangChain versions.
+    from langchain_huggingface import HuggingFaceEmbeddings
+except ModuleNotFoundError:
+    # Backward-compatible fallback for environments not yet migrated.
+    from langchain_community.embeddings import HuggingFaceEmbeddings
 
 try:
     from backend.config import settings

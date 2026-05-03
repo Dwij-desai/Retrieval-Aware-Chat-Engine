@@ -2,13 +2,13 @@ import json
 import os
 
 import pandas as pd
-from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.document_loaders import (
     CSVLoader,
     PyPDFLoader,
     TextLoader,
 )
 from langchain_core.documents import Document
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 try:
     from backend.config import settings
@@ -93,8 +93,24 @@ def chunk_documents(documents: list) -> list:
     return chunks
 
 
-# Quick test
 if __name__ == "__main__":
-    docs = load_documents("./data")
+    import sys
+
+    try:
+        from backend.vector_store import ingest_to_store
+    except ModuleNotFoundError:
+        from vector_store import ingest_to_store
+
+    data_dir = sys.argv[1] if len(sys.argv) > 1 else "./data"
+    print(f"📂 Loading documents from: {data_dir}")
+    docs = load_documents(data_dir)
+
+    if not docs:
+        print("⚠️  No documents found. Add files to the data/ folder and re-run.")
+        raise SystemExit(1)
+
     chunks = chunk_documents(docs)
-    print(f"First chunk:\n{chunks[0].page_content}")
+    print(f"📄 First chunk preview:\n{chunks[0].page_content[:200]}\n")
+
+    ingest_to_store(chunks)
+    print("🚀 Ingestion complete — ChromaDB is ready for queries.")

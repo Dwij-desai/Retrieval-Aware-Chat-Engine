@@ -1,0 +1,118 @@
+AI SaaS Chatbot — Product FAQ & Knowledge Base
+================================================
+
+## What is this product?
+This is an AI-powered SaaS chatbot platform built using Retrieval-Augmented Generation (RAG).
+It allows businesses to upload their own documents and instantly get an intelligent chatbot
+that answers questions based on that content — accurately, without hallucination.
+
+## How does it work?
+1. You upload your documents (PDF, Word, CSV, Excel, TXT, JSON).
+2. The system automatically processes and indexes your content.
+3. Users ask questions in natural language.
+4. The AI retrieves the most relevant parts of your documents.
+5. It generates a precise, grounded answer — citing your own content.
+
+## What file types are supported?
+Currently supported formats:
+- PDF documents
+- Plain text files (.txt)
+- CSV spreadsheets
+- Excel files (.xlsx, .xls)
+- JSON files
+- Word documents (coming soon)
+
+## What AI models power the chatbot?
+The platform uses best-in-class language models:
+- Primary: Llama 3.3 70B via Groq (ultra-fast, free tier available)
+- Fallback: Llama 3.1 8B Instant (fast, lightweight)
+- Optional: Google Gemini 2.0 Flash (for production deployments)
+
+## How fast are responses?
+With Groq-powered inference, responses typically arrive in under 1 second.
+Average latency is 300–600ms for most queries, even on complex documents.
+
+## Is my data private?
+Yes. Your documents are stored locally in a ChromaDB vector database on your own server.
+No document content is sent to third parties — only the query and retrieved chunks
+are sent to the AI model for generation.
+
+## What are the pricing tiers?
+- Free tier: Up to 50 queries/day, 1 document upload, community support.
+- Starter ($19/month): 2,000 queries/day, 10 document uploads, email support.
+- Pro ($49/month): 10,000 queries/day, unlimited uploads, priority support, custom branding.
+- Enterprise: Custom pricing, on-premise deployment, SLA guarantees.
+
+## How do I upload documents?
+Use the dashboard to drag and drop files, or use the REST API endpoint POST /ingest
+to programmatically upload documents from your own systems.
+
+## Can I customise the chatbot's personality?
+Yes. The system prompt is fully configurable. You can set the chatbot's name,
+tone (formal, casual, technical), language, and response style from the dashboard.
+
+## What languages does it support?
+The chatbot supports all languages that the underlying LLM supports.
+This includes English, Spanish, French, German, Arabic, Chinese, Japanese, and more.
+For best results with non-English documents, use Google Gemini models.
+
+## How is accuracy ensured?
+The RAG architecture grounds all answers in your uploaded content.
+The AI is instructed to only answer from provided context and say
+"I don't have enough information" when the answer isn't in your documents.
+This prevents hallucination and keeps responses accurate.
+
+## What is the API?
+The platform exposes a REST API:
+- GET  /         — Health check
+- POST /ask      — Submit a question, receive an answer with latency stats
+- POST /ingest   — Upload new documents (coming soon via API)
+- GET  /docs     — Interactive API documentation (Swagger UI)
+
+## How do I get started?
+1. Clone the repository or access the hosted version.
+2. Add your GROQ_API_KEY to the .env file.
+3. Place your documents in the data/ folder.
+4. Run: python backend/ingest.py
+5. Start the server: python -m uvicorn backend.api:app --port 8000
+6. Query at: http://localhost:8000/ask
+
+## Who built this?
+This platform was built as a production-ready AI SaaS product using:
+- FastAPI for the REST API layer
+- LangChain for LLM orchestration
+- ChromaDB for local vector storage
+- HuggingFace BGE embeddings (local, free)
+- Groq for ultra-fast LLM inference
+- Google Gemini as a production-grade fallback
+
+## Is there a free trial?
+Yes. The free tier is available immediately with no credit card required.
+Sign up at the platform homepage and start uploading documents within minutes.
+
+## What happens if the AI doesn't know the answer?
+The chatbot will respond: "I don't have enough information to answer that accurately."
+It will never fabricate information. If your documents don't contain the answer,
+the bot will say so clearly rather than guessing.
+
+## Can multiple users use it at the same time?
+Yes. The API is fully stateless and supports concurrent requests.
+Session management and per-user chat history is on the product roadmap.
+
+## How do I contact support?
+- Email: support@yourdomain.com
+- Docs: http://localhost:8000/docs
+- GitHub Issues: available in the repository
+
+## What is retrieval-augmented generation (RAG)?
+RAG is an AI technique that combines a search system with a language model.
+Instead of relying on the model's training data, RAG retrieves relevant content
+from your own documents first, then uses the LLM to generate an answer based only
+on that retrieved content. This makes the AI accurate, up-to-date, and trustworthy.
+
+## What are embeddings?
+Embeddings are numerical vector representations of text.
+When you upload a document, it is split into chunks and each chunk is converted
+into a vector using a local HuggingFace model (BAAI/bge-small-en-v1.5).
+These vectors capture the meaning of the text and enable semantic search —
+finding relevant content by meaning, not just keyword matching.

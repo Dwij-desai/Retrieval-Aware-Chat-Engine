@@ -7,8 +7,10 @@ dependencies:
   - pip
   - pip:
       - langchain
+      - langchain-chroma
       - langchain-openai
       - langchain-community
+      - langchain-huggingface
       - chromadb
       - openai
       - fastapi

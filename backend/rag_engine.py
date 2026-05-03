@@ -1,19 +1,23 @@
-from langchain_google_genai import ChatGoogleGenerativeAI
+from __future__ import annotations
+
+import re
+
+from langchain_core.documents import Document
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate
-from langchain_core.runnables import RunnablePassthrough
-from langchain_core.documents import Document
+from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_groq import ChatGroq
 
 try:
     # Package-style imports (e.g., `python -m backend.rag_engine`)
-    from backend.vector_store import get_vector_store
     from backend.config import settings
+    from backend.vector_store import get_vector_store
 except ModuleNotFoundError as exc:
     if exc.name not in {"backend", "backend.vector_store", "backend.config"}:
         raise
     # Script-style imports (e.g., `python backend/rag_engine.py`)
-    from vector_store import get_vector_store
     from config import settings
+    from vector_store import get_vector_store
 
 # ── 1. THE PROMPT TEMPLATE ──────────────────────────────────────
 # This is where most developers get lazy. A good prompt makes
@@ -29,62 +33,221 @@ Your rules:
 Context: {context}
 """
 
-prompt = ChatPromptTemplate.from_messages([
-    ("system", SYSTEM_PROMPT),
-    ("human", "{question}")
-])
+prompt = ChatPromptTemplate.from_messages(
+    [("system", SYSTEM_PROMPT), ("human", "{question}")]
+)
 
-# ── 2. FORMAT RETRIEVED DOCS ────────────────────────────────────
+
+# ── 2. DOMAIN ERRORS ─────────────────────────────────────────────
+class RAGEngineError(Exception):
+    """Base class for RAG engine failures surfaced to API layer."""
+
+
+class ModelUnavailableError(RAGEngineError):
+    """Raised when the configured Gemini model cannot be used."""
+
+
+class QuotaExceededError(RAGEngineError):
+    """Raised when all model attempts fail due to quota/rate limits."""
+
+
+class UpstreamLLMError(RAGEngineError):
+    """Raised when the Gemini API fails for other upstream reasons."""
+
+
+# ── 3. FORMAT RETRIEVED DOCS ────────────────────────────────────
 def format_docs(docs: list[Document]) -> str:
-    """
-    Join retrieved chunks into a single context string.
-    """
+    """Join retrieved chunks into a single context string."""
     return "\n\n---\n\n".join([doc.page_content for doc in docs])
 
-# ── 3. BUILD THE RAG CHAIN ──────────────────────────────────────
-def build_rag_chain():
-    """
-    Creates the full RAG chain using LangChain's LCEL syntax.
-    Chain: query → retriever → format → prompt → LLM → parse
-    """
-    vectorstore = get_vector_store()
 
-    # Retriever: wraps vector store for easy use in chains
+# ── 4. RAG BUILDING BLOCKS ──────────────────────────────────────
+def _ordered_model_candidates() -> list[str]:
+    """Return primary model followed by configured fallbacks, deduplicated."""
+    ordered = [settings.get_primary_model(), *settings.get_fallback_models()]
+    unique_models: list[str] = []
+    for model_name in ordered:
+        model_name = model_name.strip()
+        if not model_name:
+            continue
+        if model_name not in unique_models:
+            unique_models.append(model_name)
+    return unique_models
+
+
+def _build_generation_chain(model_name: str):
+    """Create the generation pipeline for one model."""
+    if settings.llm_provider == "groq":
+        llm = ChatGroq(
+            model=model_name,
+            temperature=settings.temperature,
+            api_key=settings.groq_api_key,
+        )
+    else:
+        llm = ChatGoogleGenerativeAI(
+            model=model_name,
+            temperature=settings.temperature,
+            google_api_key=settings.google_api_key,
+        )
+    return prompt | llm | StrOutputParser()
+
+
+def _retrieve_context(question: str) -> str:
+    """Retrieve top-k chunks once and join them as model context."""
+    vectorstore = get_vector_store()
     retriever = vectorstore.as_retriever(
         search_type="similarity",
-        search_kwargs={"k": settings.top_k}
+        search_kwargs={"k": settings.top_k},
+    )
+    docs = retriever.invoke(question)
+    return format_docs(docs)
+
+
+def _is_quota_error(error_text: str) -> bool:
+    lowered = error_text.lower()
+    markers = [
+        "resource_exhausted",
+        "quota",
+        "rate limit",
+        "too many requests",
+        "429",
+    ]
+    return any(marker in lowered for marker in markers)
+
+
+def _is_model_unavailable_error(error_text: str) -> bool:
+    lowered = error_text.lower()
+    return (
+        "not_found" in lowered and "model" in lowered
+    ) or "model is not found" in lowered
+
+
+def _is_upstream_retryable_error(error_text: str) -> bool:
+    lowered = error_text.lower()
+    markers = [
+        "service unavailable",
+        "unavailable",
+        "deadline exceeded",
+        "timed out",
+        "internal",
+        "503",
+        "500",
+    ]
+    return any(marker in lowered for marker in markers)
+
+
+def _first_error_line(error_text: str) -> str:
+    """Keep user-facing error payload compact for API responses."""
+    compact = " ".join(error_text.split())
+    status_match = re.search(r"\(([^)]+)\):\s*(\d{3})", compact)
+    if status_match:
+        status = status_match.group(1)
+        code = status_match.group(2)
+        return f"{status} ({code})"
+    if len(compact) <= 240:
+        return compact
+    return f"{compact[:237]}..."
+
+
+def _format_attempt_diagnostics(attempt_errors: list[tuple[str, str]]) -> str:
+    """Format per-model failures into one compact string."""
+    if not attempt_errors:
+        return "No attempt diagnostics captured."
+    return " | ".join([f"{model}: {error}" for model, error in attempt_errors])
+
+
+def _build_llm_error(
+    model_name: str,
+    all_models: list[str],
+    raw_error: Exception,
+    attempt_errors: list[tuple[str, str]] | None = None,
+) -> RAGEngineError:
+    error_text = str(raw_error)
+    compact_error = _first_error_line(error_text)
+    model_list = ", ".join(all_models)
+    diagnostics = _format_attempt_diagnostics(attempt_errors or [])
+
+    if _is_quota_error(error_text):
+        return QuotaExceededError(
+            "LLM quota/rate limit exceeded for attempted models "
+            f"[{model_list}]. Last failure on '{model_name}': {compact_error}. "
+            f"Attempt diagnostics: {diagnostics}"
+        )
+
+    if _is_model_unavailable_error(error_text):
+        return ModelUnavailableError(
+            "No configured LLM model could be used. Attempted models: "
+            f"[{model_list}]. Last failure on '{model_name}': {compact_error}. "
+            f"Attempt diagnostics: {diagnostics}"
+        )
+
+    return UpstreamLLMError(
+        "LLM provider failed after trying models "
+        f"[{model_list}]. Last failure on '{model_name}': {compact_error}. "
+        f"Attempt diagnostics: {diagnostics}"
     )
 
-    # LLM: Gemini 1.5 Flash — free tier, fast, handles long contexts well
-    # temperature=0.1 → more factual, less creative
-    llm = ChatGoogleGenerativeAI(
-        model=settings.model_name,  # "gemini-1.5-flash"
-        temperature=settings.temperature,
-        google_api_key=settings.google_api_key,
-        convert_system_message_to_human=True  # required for Gemini
+
+def _should_try_next_model(error_text: str) -> bool:
+    return (
+        _is_quota_error(error_text)
+        or _is_model_unavailable_error(error_text)
+        or _is_upstream_retryable_error(error_text)
     )
 
-    # LCEL Chain: connects each step with pipe operator |
-    rag_chain = (
-        {
-            "context": retriever | format_docs,  # retrieves + formats
-            "question": RunnablePassthrough()    # passes query through
-        }
-        | prompt              # fills the template
-        | llm                 # sends to LLM
-        | StrOutputParser()   # extracts text from response
-    )
-    return rag_chain
 
-# ── 4. MAIN ASK FUNCTION ────────────────────────────────────────
+# ── 5. BUILD THE RAG CHAIN ──────────────────────────────────────
+def build_rag_chain(model_name: str):
+    """Creates the generation chain for one model."""
+    return _build_generation_chain(model_name=model_name)
+
+
+# ── 6. MAIN ASK FUNCTION ────────────────────────────────────────
 def ask(question: str) -> str:
-    """
-    Single entry point for the RAG chatbot.
-    """
-    chain = build_rag_chain()
-    # This chain expects a raw question string as input.
-    return chain.invoke(question)
+    """Single entry point for the RAG chatbot with model fallback."""
+    context = _retrieve_context(question)
+    payload = {"context": context, "question": question}
+    candidate_models = _ordered_model_candidates()
+    if not candidate_models:
+        raise ModelUnavailableError(
+            "No LLM models configured. Set MODEL_NAME/GROQ_MODEL_NAME in .env."
+        )
+
+    last_error: Exception | None = None
+    attempt_errors: list[tuple[str, str]] = []
+    for index, model_name in enumerate(candidate_models):
+        chain = build_rag_chain(model_name=model_name)
+        try:
+            return chain.invoke(payload)
+        except Exception as exc:
+            last_error = exc
+            error_text = str(exc)
+            attempt_errors.append((model_name, _first_error_line(error_text)))
+            has_more_models = index < len(candidate_models) - 1
+            if has_more_models and _should_try_next_model(error_text):
+                continue
+            raise _build_llm_error(
+                model_name,
+                candidate_models,
+                exc,
+                attempt_errors,
+            ) from exc
+
+    if last_error is not None:
+        raise _build_llm_error(
+            candidate_models[-1],
+            candidate_models,
+            last_error,
+            attempt_errors,
+        ) from last_error
+
+    raise UpstreamLLMError("No models were available to execute the request.")
+
 
 if __name__ == "__main__":
-    answer = ask("What are the side effects of ibuprofen?")
-    print(f"\n🤖 Answer:\n{answer}")
+    try:
+        answer = ask("What are the side effects of ibuprofen?")
+        print(f"\nAnswer:\n{answer}")
+    except RAGEngineError as exc:
+        print(f"\nRAG engine error: {exc}\nCheck your .env provider settings.")
+        raise SystemExit(1)

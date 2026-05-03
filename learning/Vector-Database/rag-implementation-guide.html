@@ -140,6 +140,7 @@ body {
 .t-cr { background: rgba(188,140,255,0.1); color: var(--purple); border: 1px solid rgba(188,140,255,0.3); }
 .t-fa { background: rgba(227,179,65,0.1); color: var(--yellow); border: 1px solid rgba(227,179,65,0.3); }
 .t-fp { background: rgba(255,166,87,0.1); color: var(--orange); border: 1px solid rgba(255,166,87,0.3); }
+.t-dc { background: rgba(255,123,114,0.1); color: var(--red); border: 1px solid rgba(255,123,114,0.3); }
 
 /* ── SECTION ── */
 .section {
@@ -348,9 +349,10 @@ td:first-child { font-family: var(--mono); font-size: 0.75rem; color: var(--acce
     <span class="stack-tag t-py">Python 3.11</span>
     <span class="stack-tag t-lc">LangChain</span>
     <span class="stack-tag t-cr">ChromaDB</span>
-    <span class="stack-tag t-fa">FAISS</span>
     <span class="stack-tag t-fp">FastAPI</span>
-    <span class="stack-tag t-lc">Google Gemini</span>
+    <span class="stack-tag t-dc">Groq</span>
+    <span class="stack-tag t-lc">Llama 3.3 70B</span>
+    <span class="stack-tag t-fa">Gemini (backup)</span>
   </div>
 </div>
 
@@ -376,8 +378,8 @@ td:first-child { font-family: var(--mono); font-size: 0.75rem; color: var(--acce
   │                  BACKEND (FastAPI)                           │
   │                                                              │
   │  ┌──────────────┐   ┌──────────────┐   ┌────────────────┐  │
-  │  │ /ask endpoint│ → │  RAG Engine  │ → │  LLM (Gemini / │  │
-  │  │              │   │              │   │   HuggingFace)  │  │
+  │  │ /ask endpoint│ → │  RAG Engine  │ → │  LLM (Groq /   │  │
+  │  │              │   │              │   │   Gemini)       │  │
   │  └──────────────┘   └──────┬───────┘   └────────────────┘  │
   │                             │                                │
   │                    ┌────────▼────────┐                      │
@@ -393,7 +395,7 @@ td:first-child { font-family: var(--mono); font-size: 0.75rem; color: var(--acce
   │                    │   Google)       │                       │
   │                    └─────────────────┘                      │
   └─────────────────────────────────────────────────────────────┘
-  
+
   ┌─────────────────────────────────────────────────────────────┐
   │               INGESTION PIPELINE (one-time / scheduled)      │
   │                                                              │
@@ -406,16 +408,18 @@ td:first-child { font-family: var(--mono); font-size: 0.75rem; color: var(--acce
     <span class="dir">ai_saas/</span><br>
     <span class="cmnt">│</span><br>
     ├── <span class="dir">backend/</span><br>
-    │   ├── <span class="file">config.py</span>        <span class="cmnt"># ✅ Settings and env vars (google_api_key, chunking, model)</span><br>
+    ├── <span class="file">config.py</span>        <span class="cmnt"># ✅ Multi-provider settings (Groq + Gemini, chunking, model)</span><br>
     │   ├── <span class="file">ingest.py</span>        <span class="cmnt"># ✅ Multi-format loader + chunker (PDF/TXT/CSV/Excel/JSON)</span><br>
     │   ├── <span class="file">embedder.py</span>      <span class="cmnt"># ✅ HuggingFace (default) or Google embeddings</span><br>
-    │   ├── <span class="file">vector_store.py</span>  <span class="cmnt"># 🔲 ChromaDB store/retrieve interface (next step)</span><br>
-    │   ├── <span class="file">rag_engine.py</span>    <span class="cmnt"># 🔲 RAG chain with Gemini (planned)</span><br>
-    │   └── <span class="file">api.py</span>           <span class="cmnt"># 🔲 FastAPI endpoints (planned)</span><br>
+    │   ├── <span class="file">vector_store.py</span>  <span class="cmnt"># ✅ ChromaDB store/retrieve interface</span><br>
+    │   ├── <span class="file">rag_engine.py</span>    <span class="cmnt"># ✅ RAG chain with Groq/Gemini provider switch + typed errors</span><br>
+    │   └── <span class="file">api.py</span>           <span class="cmnt"># ✅ FastAPI + lifespan pre-warm + clean error mapping</span><br>
     │<br>
-    ├── <span class="dir">data/</span>                <span class="cmnt"># ✅ Raw documents go here (at project root)</span><br>
+    ├── <span class="dir">data/</span>                <span class="cmnt"># ✅ Raw documents go here (product_faq.txt — 15 chunks ingested)</span><br>
+    ├── <span class="dir">chroma_db/</span>           <span class="cmnt"># ✅ Persisted vector store (populated, ready for queries)</span><br>
     ├── <span class="dir">Test_dataset/</span>        <span class="cmnt"># ✅ Larger sample datasets for validation</span><br>
     ├── <span class="dir">learning/</span>            <span class="cmnt"># ✅ Reference guides (this file lives here)</span><br>
+    ├── <span class="file">start.sh</span>             <span class="cmnt"># ✅ One-command server startup script</span><br>
     ├── <span class="file">environment.yml</span>      <span class="cmnt"># ✅ Reproducible conda environment</span><br>
     ├── <span class="file">Environment.sh</span>       <span class="cmnt"># ✅ One-command env setup script</span><br>
     ├── <span class="file">AGENTS.md</span>            <span class="cmnt"># ✅ Project guidelines and roadmap</span><br>
@@ -467,15 +471,16 @@ python --version           <span class="cm"># should show Python 3.11.x</span></
   <div class="code-wrap">
     <div class="code-header">
       <div class="code-dots"><span class="dot-r"></span><span class="dot-y"></span><span class="dot-g"></span></div>
-      <span class="code-title">terminal — install all dependencies (no OpenAI required)</span>
+      <span class="code-title">terminal — install all dependencies</span>
       <button class="code-copy" onclick="copyCode(this)">copy</button>
     </div>
-    <pre><span class="cm"># Install via pip inside the conda env (conda activate ai_saas first!)</span>
-pip install langchain langchain-google-genai langchain-community \
-            chromadb fastapi uvicorn \
+    <pre><span class="cm"># Install via pip inside the conda env (conda activate AI_SaaS first!)</span>
+pip install langchain langchain-google-genai langchain-groq \
+            langchain-community langchain-chroma langchain-huggingface \
+            langchain-text-splitters fastapi uvicorn \
             pypdf sentence-transformers python-dotenv \
-            pydantic-settings google-generativeai \
-            pandas openpyxl      <span class="cm"># required for Excel (.xlsx/.xls) loading in ingest.py</span>
+            pydantic-settings google-generativeai chromadb \
+            pandas openpyxl      <span class="cm"># required for Excel (.xlsx/.xls) loading</span>
 
 <span class="cm"># Optional: freeze your exact versions for reproducibility</span>
 pip freeze > requirements.txt</pre>
@@ -496,8 +501,10 @@ pip freeze > requirements.txt</pre>
   - pip
   - pip:
     - langchain
+    - langchain-chroma
     - langchain-google-genai
     - langchain-community
+    - langchain-huggingface
     - chromadb
     - google-generativeai
     - fastapi
@@ -523,24 +530,40 @@ pip freeze > requirements.txt</pre>
     <pre><span class="kw">from</span> <span class="nm">pydantic_settings</span> <span class="kw">import</span> BaseSettings
 
 <span class="kw">class</span> <span class="fn">Settings</span>(BaseSettings):
-    <span class="cm"># Google Gemini API key (free tier available)</span>
-    google_api_key: <span class="py">str</span>
+    <span class="cm"># ── LLM PROVIDER: set to "groq" or "gemini" ──────────────────</span>
+    llm_provider: <span class="py">str</span> = <span class="st">"groq"</span>
 
-    <span class="cm"># Vector DB</span>
+    <span class="cm"># ── API KEYS ──────────────────────────────────────────────────</span>
+    google_api_key: <span class="py">str</span> = <span class="st">""</span>       <span class="cm"># optional when using Groq</span>
+    groq_api_key: <span class="py">str</span> = <span class="st">""</span>         <span class="cm"># free at console.groq.com</span>
+
+    <span class="cm"># ── MODEL NAMES ───────────────────────────────────────────────</span>
+    model_name: <span class="py">str</span> = <span class="st">"gemini-2.0-flash-lite"</span>        <span class="cm"># Gemini primary</span>
+    fallback_model_names: <span class="py">str</span> = <span class="st">"gemini-2.0-flash"</span>    <span class="cm"># Gemini fallback</span>
+    groq_model_name: <span class="py">str</span> = <span class="st">"llama-3.3-70b-versatile"</span>  <span class="cm"># Groq primary</span>
+    groq_fallback_model_names: <span class="py">str</span> = <span class="st">"llama-3.1-8b-instant"</span>
+
+    <span class="cm"># ── VECTOR DB ─────────────────────────────────────────────────</span>
     chroma_persist_dir: <span class="py">str</span> = <span class="st">"./chroma_db"</span>
     collection_name: <span class="py">str</span> = <span class="st">"ai_saas_docs"</span>
 
-    <span class="cm"># Retrieval</span>
-    top_k: <span class="py">int</span> = <span class="nm">4</span>               <span class="cm"># how many chunks to retrieve</span>
-    chunk_size: <span class="py">int</span> = <span class="nm">500</span>         <span class="cm"># characters per chunk</span>
-    chunk_overlap: <span class="py">int</span> = <span class="nm">50</span>       <span class="cm"># overlap between chunks</span>
-
-    <span class="cm"># LLM — Gemini 1.5 Flash is free tier, fast, and capable</span>
-    model_name: <span class="py">str</span> = <span class="st">"gemini-1.5-flash"</span>
+    <span class="cm"># ── RETRIEVAL + GENERATION ────────────────────────────────────</span>
+    top_k: <span class="py">int</span> = <span class="nm">4</span>
+    chunk_size: <span class="py">int</span> = <span class="nm">500</span>
+    chunk_overlap: <span class="py">int</span> = <span class="nm">50</span>
     temperature: <span class="py">float</span> = <span class="nm">0.1</span>
 
+    <span class="kw">def</span> <span class="fn">get_primary_model</span>(self) -> <span class="py">str</span>:
+        <span class="st">"""Return primary model for the active provider."""</span>
+        <span class="kw">return</span> self.groq_model_name <span class="kw">if</span> self.llm_provider == <span class="st">"groq"</span> <span class="kw">else</span> self.model_name
+
+    <span class="kw">def</span> <span class="fn">get_fallback_models</span>(self) -> <span class="py">list</span>[<span class="py">str</span>]:
+        <span class="st">"""Return fallback list for the active provider."""</span>
+        raw = self.groq_fallback_model_names <span class="kw">if</span> self.llm_provider == <span class="st">"groq"</span> <span class="kw">else</span> self.fallback_model_names
+        <span class="kw">return</span> [m.<span class="fn">strip</span>() <span class="kw">for</span> m <span class="kw">in</span> raw.<span class="fn">split</span>(<span class="st">","</span>) <span class="kw">if</span> m.<span class="fn">strip</span>()]
+
     <span class="kw">class</span> <span class="fn">Config</span>:
-        env_file = <span class="st">".env"</span>
+        env_file = (<span class="st">".env"</span>, <span class="st">".gitignore/.env"</span>)
 
 settings = <span class="fn">Settings</span>()</pre>
   </div>
@@ -551,12 +574,28 @@ settings = <span class="fn">Settings</span>()</pre>
       <span class="code-title">.env</span>
       <button class="code-copy" onclick="copyCode(this)">copy</button>
     </div>
-    <pre>GOOGLE_API_KEY=your-google-api-key-here</pre>
+    <pre><span class="cm"># ── PROVIDER: "groq" or "gemini" ──────────────────────────────</span>
+LLM_PROVIDER=groq
+
+<span class="cm"># ── GROQ (free: 14,400 req/day — console.groq.com) ────────────</span>
+GROQ_API_KEY=gsk_your_groq_key_here
+GROQ_MODEL_NAME=llama-3.3-70b-versatile
+GROQ_FALLBACK_MODEL_NAMES=llama-3.1-8b-instant
+
+<span class="cm"># ── GEMINI (backup — aistudio.google.com) ─────────────────────</span>
+GOOGLE_API_KEY=AIzaSy_your_gemini_key_here
+MODEL_NAME=gemini-2.0-flash-lite
+FALLBACK_MODEL_NAMES=gemini-2.0-flash</pre>
+  </div>
+
+  <div class="callout good">
+    <span class="callout-icon">⚡</span>
+    <p><strong>Get your free Groq key:</strong> Go to <code>console.groq.com</code> → Sign up (no credit card) → API Keys → Create key. Free tier gives <strong>14,400 requests/day</strong> — far more generous than Gemini's 1,500 RPD free tier.</p>
   </div>
 
   <div class="callout info">
     <span class="callout-icon">⚡</span>
-    <p><strong>Get your free Google API key:</strong> Go to <code>aistudio.google.com</code> → Sign in → "Get API Key" → Create key. The free tier includes Gemini 1.5 Flash with generous rate limits (15 requests/min, 1M tokens/day). No credit card needed.</p>
+    <p><strong>Switching providers:</strong> Change <code>LLM_PROVIDER=gemini</code> in <code>.env</code> to switch to Gemini. No code changes needed — the config and RAG engine automatically route to the right model and API key.</p>
   </div>
 
   <div class="callout info">
@@ -644,8 +683,7 @@ settings = <span class="fn">Settings</span>()</pre>
 <span class="kw">import</span> <span class="nm">os</span>
 
 <span class="kw">import</span> <span class="nm">pandas</span> <span class="kw">as</span> <span class="nm">pd</span>
-<span class="kw">from</span> <span class="nm">config</span> <span class="kw">import</span> settings
-<span class="kw">from</span> <span class="nm">langchain.text_splitter</span> <span class="kw">import</span> RecursiveCharacterTextSplitter
+<span class="kw">from</span> <span class="nm">langchain_text_splitters</span> <span class="kw">import</span> RecursiveCharacterTextSplitter  <span class="cm"># ✅ fixed import</span>
 <span class="kw">from</span> <span class="nm">langchain_community.document_loaders</span> <span class="kw">import</span> (
     CSVLoader, PyPDFLoader, TextLoader,
 )
@@ -724,13 +762,27 @@ settings = <span class="fn">Settings</span>()</pre>
     <span class="kw">return</span> chunks
 
 
-<span class="cm"># ── Smoke test ──────────────────────────────────────────────────</span>
-<span class="cm"># Run: export PYTHONPATH=$PYTHONPATH:$(pwd)/backend
-# Then: python backend/ingest.py</span>
+<span class="cm"># ── Ingestion entrypoint ──────────────────────────────────────────────</span>
+<span class="cm"># Run from project root: python backend/ingest.py</span>
 <span class="kw">if</span> __name__ == <span class="st">"__main__"</span>:
-    docs = <span class="fn">load_documents</span>(<span class="st">"./data"</span>)          <span class="cm"># data/ at project root</span>
+    <span class="kw">import</span> <span class="nm">sys</span>
+    <span class="kw">try</span>:
+        <span class="kw">from</span> <span class="nm">backend.vector_store</span> <span class="kw">import</span> ingest_to_store
+    <span class="kw">except</span> <span class="fn">ModuleNotFoundError</span>:
+        <span class="kw">from</span> <span class="nm">vector_store</span> <span class="kw">import</span> ingest_to_store
+
+    data_dir = sys.argv[<span class="nm">1</span>] <span class="kw">if</span> <span class="fn">len</span>(sys.argv) > <span class="nm">1</span> <span class="kw">else</span> <span class="st">"./data"</span>
+    <span class="fn">print</span>(<span class="st">f"📂 Loading from: {data_dir}"</span>)
+    docs = <span class="fn">load_documents</span>(data_dir)
+
+    <span class="kw">if not</span> docs:
+        <span class="fn">print</span>(<span class="st">"⚠️  No documents found. Add files to data/ and re-run."</span>)
+        <span class="fn">raise</span> <span class="fn">SystemExit</span>(<span class="nm">1</span>)
+
     chunks = <span class="fn">chunk_documents</span>(docs)
-    <span class="fn">print</span>(<span class="st">f"First chunk:\n{chunks[0].page_content}"</span>)</pre>
+    <span class="fn">print</span>(<span class="st">f"📄 Preview: {chunks[<span class="nm">0</span>].page_content[:<span class="nm">200</span>]}"</span>)
+    <span class="fn">ingest_to_store</span>(chunks)  <span class="cm"># ✅ actually saves to ChromaDB</span>
+    <span class="fn">print</span>(<span class="st">"🚀 Ingestion complete — ChromaDB is ready."</span>)</pre>
   </div>
 
   <div class="callout info">
@@ -785,9 +837,19 @@ settings = <span class="fn">Settings</span>()</pre>
       <span class="code-title">backend/embedder.py</span>
       <button class="code-copy" onclick="copyCode(this)">copy</button>
     </div>
-    <pre><span class="kw">from</span> <span class="nm">langchain_community.embeddings</span> <span class="kw">import</span> HuggingFaceEmbeddings
-<span class="kw">from</span> <span class="nm">langchain_google_genai</span> <span class="kw">import</span> GoogleGenerativeAIEmbeddings
-<span class="kw">from</span> <span class="nm">config</span> <span class="kw">import</span> settings
+    <pre><span class="kw">from</span> <span class="nm">langchain_google_genai</span> <span class="kw">import</span> GoogleGenerativeAIEmbeddings
+
+<span class="kw">try</span>:
+    <span class="kw">from</span> <span class="nm">langchain_huggingface</span> <span class="kw">import</span> HuggingFaceEmbeddings
+<span class="kw">except</span> <span class="fn">ModuleNotFoundError</span>:
+    <span class="kw">from</span> <span class="nm">langchain_community.embeddings</span> <span class="kw">import</span> HuggingFaceEmbeddings
+
+<span class="kw">try</span>:
+    <span class="kw">from</span> <span class="nm">backend.config</span> <span class="kw">import</span> settings
+<span class="kw">except</span> <span class="fn">ModuleNotFoundError</span> <span class="kw">as</span> exc:
+    <span class="kw">if</span> exc.name <span class="kw">not in</span> {<span class="st">"backend"</span>, <span class="st">"backend.config"</span>}:
+        <span class="kw">raise</span>
+    <span class="kw">from</span> <span class="nm">config</span> <span class="kw">import</span> settings
 
 
 <span class="kw">def</span> <span class="fn">get_embedder</span>(use_google: <span class="py">bool</span> = <span class="nm">False</span>):
@@ -847,14 +909,14 @@ settings = <span class="fn">Settings</span>()</pre>
     <span class="sec-num">SECTION 05</span>
     <h2>Storing in Vector Database</h2>
   </div>
-  <p class="lead">We'll use ChromaDB — runs locally, zero config, persists to disk. Perfect for development. <strong>Note:</strong> <code>vector_store.py</code> is the next file to implement. The code below is your blueprint — once ingestion works, build this next.</p>
+  <p class="lead">We'll use ChromaDB — runs locally, zero config, persists to disk. Perfect for development. <strong>Note:</strong> <code>vector_store.py</code> is now implemented and is used directly by retrieval and RAG query flows.</p>
 
   <div class="diagram">
     <div class="diagram-title">◈ What's Inside a Vector DB Collection</div>
     <div class="dia-pre">
   CHROMADB COLLECTION: "ai_saas_docs"
   ══════════════════════════════════════════════════════════════
-  
+
   Record 1:
   ┌─────────────────────────────────────────────────────────┐
   │  id:        "chunk_0001"                                │
@@ -866,7 +928,7 @@ settings = <span class="fn">Settings</span>()</pre>
   │               "category": "medical"                    │
   │             }                                          │
   └─────────────────────────────────────────────────────────┘
-  
+
   Record 2:
   ┌─────────────────────────────────────────────────────────┐
   │  id:        "chunk_0002"                                │
@@ -874,9 +936,9 @@ settings = <span class="fn">Settings</span>()</pre>
   │  document:  "Side effects include nausea, dizziness..." │
   │  metadata:  { "source": "drug_guide.pdf", "page": 3 }  │
   └─────────────────────────────────────────────────────────┘
-  
+
   ... (thousands more records)
-  
+
   HNSW Index (auto-built):
   ──────────────────────────
   Allows similarity search across ALL records in milliseconds</div>
@@ -885,12 +947,22 @@ settings = <span class="fn">Settings</span>()</pre>
   <div class="code-wrap">
     <div class="code-header">
       <div class="code-dots"><span class="dot-r"></span><span class="dot-y"></span><span class="dot-g"></span></div>
-      <span class="code-title">backend/vector_store.py — 🔲 next file to implement</span>
+      <span class="code-title">backend/vector_store.py — current implementation</span>
       <button class="code-copy" onclick="copyCode(this)">copy</button>
     </div>
-    <pre><span class="kw">from</span> <span class="nm">langchain_community.vectorstores</span> <span class="kw">import</span> Chroma
-<span class="kw">from</span> <span class="nm">embedder</span> <span class="kw">import</span> get_embedder
-<span class="kw">from</span> <span class="nm">config</span> <span class="kw">import</span> settings
+    <pre><span class="kw">try</span>:
+    <span class="kw">from</span> <span class="nm">langchain_chroma</span> <span class="kw">import</span> Chroma
+<span class="kw">except</span> <span class="fn">ModuleNotFoundError</span>:
+    <span class="kw">from</span> <span class="nm">langchain_community.vectorstores</span> <span class="kw">import</span> Chroma
+
+<span class="kw">try</span>:
+    <span class="kw">from</span> <span class="nm">backend.config</span> <span class="kw">import</span> settings
+    <span class="kw">from</span> <span class="nm">backend.embedder</span> <span class="kw">import</span> get_embedder
+<span class="kw">except</span> <span class="fn">ModuleNotFoundError</span> <span class="kw">as</span> exc:
+    <span class="kw">if</span> exc.name <span class="kw">not in</span> {<span class="st">"backend"</span>, <span class="st">"backend.config"</span>, <span class="st">"backend.embedder"</span>}:
+        <span class="kw">raise</span>
+    <span class="kw">from</span> <span class="nm">config</span> <span class="kw">import</span> settings
+    <span class="kw">from</span> <span class="nm">embedder</span> <span class="kw">import</span> get_embedder
 
 
 <span class="kw">def</span> <span class="fn">get_vector_store</span>():
@@ -933,7 +1005,7 @@ settings = <span class="fn">Settings</span>()</pre>
   <div class="code-wrap">
     <div class="code-header">
       <div class="code-dots"><span class="dot-r"></span><span class="dot-y"></span><span class="dot-g"></span></div>
-      <span class="code-title">run_ingestion.py — 🔲 planned (wire up once vector_store.py is built)</span>
+      <span class="code-title">run_ingestion.py — ingestion entrypoint using current vector store layer</span>
       <button class="code-copy" onclick="copyCode(this)">copy</button>
     </div>
     <pre><span class="kw">from</span> <span class="nm">backend.ingest</span> <span class="kw">import</span> load_documents, chunk_documents
@@ -999,7 +1071,7 @@ settings = <span class="fn">Settings</span>()</pre>
   <div class="code-wrap">
     <div class="code-header">
       <div class="code-dots"><span class="dot-r"></span><span class="dot-y"></span><span class="dot-g"></span></div>
-      <span class="code-title">query_test.py — 🔲 planned (needs vector_store.py first)</span>
+      <span class="code-title">query_test.py — retrieval smoke test with current vector store</span>
       <button class="code-copy" onclick="copyCode(this)">copy</button>
     </div>
     <pre><span class="kw">from</span> <span class="nm">backend.vector_store</span> <span class="kw">import</span> get_vector_store
@@ -1085,7 +1157,7 @@ settings = <span class="fn">Settings</span>()</pre>
       └────────────────────────────────────────────────────┘
        │
        ▼
-  [4] LLM (Gemini 1.5 Flash — free tier)
+  [4] LLM (Groq primary + fallback models  |  or Gemini if configured)
        │
        ▼
   [5] GROUNDED RESPONSE → back to user</div>
@@ -1094,96 +1166,73 @@ settings = <span class="fn">Settings</span>()</pre>
   <div class="code-wrap">
     <div class="code-header">
       <div class="code-dots"><span class="dot-r"></span><span class="dot-y"></span><span class="dot-g"></span></div>
-      <span class="code-title">backend/rag_engine.py — 🔲 planned (implement after vector_store.py)</span>
+      <span class="code-title">backend/rag_engine.py — multi-provider, fallback + typed errors</span>
       <button class="code-copy" onclick="copyCode(this)">copy</button>
     </div>
-    <pre"><span class="kw">from</span> <span class="nm">langchain_google_genai</span> <span class="kw">import</span> ChatGoogleGenerativeAI
-<span class="kw">from</span> <span class="nm">langchain.prompts</span> <span class="kw">import</span> ChatPromptTemplate
-<span class="kw">from</span> <span class="nm">langchain.schema.runnable</span> <span class="kw">import</span> RunnablePassthrough
-<span class="kw">from</span> <span class="nm">langchain.schema.output_parser</span> <span class="kw">import</span> StrOutputParser
-<span class="kw">from</span> <span class="nm">vector_store</span> <span class="kw">import</span> get_vector_store
-<span class="kw">from</span> <span class="nm">config</span> <span class="kw">import</span> settings
+    <span class="kw">from</span> <span class="nm">langchain_google_genai</span> <span class="kw">import</span> ChatGoogleGenerativeAI
+    <span class="kw">from</span> <span class="nm">langchain_groq</span> <span class="kw">import</span> ChatGroq  <span class="cm"># ✅ Groq support added</span>
+    <span class="kw">from</span> <span class="nm">langchain_core.output_parsers</span> <span class="kw">import</span> StrOutputParser
+    <span class="kw">from</span> <span class="nm">langchain_core.prompts</span> <span class="kw">import</span> ChatPromptTemplate
+
+    <span class="kw">from</span> <span class="nm">backend.config</span> <span class="kw">import</span> settings
+    <span class="kw">from</span> <span class="nm">backend.vector_store</span> <span class="kw">import</span> get_vector_store
 
 
-<span class="cm"># ── 1. THE PROMPT TEMPLATE ──────────────────────────────────────</span>
-<span class="cm"># This is where most developers get lazy. A good prompt makes</span>
-<span class="cm"># the difference between a hallucinating bot and an accurate one.</span>
-
-SYSTEM_PROMPT = <span class="st">"""You are a knowledgeable and helpful AI assistant.
-
-Your rules:
-1. Answer ONLY using the provided context below.
-2. If the answer is not in the context, say:
-   "I don't have enough information to answer that accurately."
-3. Be concise. Cite context when possible.
-4. Never make up information.
-
-Context:
-{context}"""</span>
-
-prompt = <span class="fn">ChatPromptTemplate</span>.<span class="fn">from_messages</span>([
-    (<span class="st">"system"</span>, SYSTEM_PROMPT),
-    (<span class="st">"human"</span>, <span class="st">"{question}"</span>)
-])
-
-
-<span class="cm"># ── 2. FORMAT RETRIEVED DOCS ────────────────────────────────────</span>
-
-<span class="kw">def</span> <span class="fn">format_docs</span>(docs) -> <span class="py">str</span>:
-    <span class="st">"""Join retrieved chunks into a single context string."""</span>
-    <span class="kw">return</span> <span class="st">"\n\n---\n\n"</span>.<span class="fn">join</span>([doc.page_content <span class="kw">for</span> doc <span class="kw">in</span> docs])
-
-
-<span class="cm"># ── 3. BUILD THE RAG CHAIN ──────────────────────────────────────</span>
-
-<span class="kw">def</span> <span class="fn">build_rag_chain</span>():
-    <span class="st">"""
-    Creates the full RAG chain using LangChain's LCEL syntax.
-    Chain: query → retriever → format → prompt → LLM → parse
+    SYSTEM_PROMPT = <span class="st">"""
+    You are a knowledgeable and helpful AI assistant.
+    Your rules:
+        1. Answer ONLY using the provided context below.
+        2. If the answer is not in the context, say: "I don't have enough information."
+        3. Be concise. Never make up information.
+    Context: {context}
     """</span>
-    vectorstore = <span class="fn">get_vector_store</span>()
 
-    <span class="cm"># Retriever: wraps vector store for easy use in chains</span>
-    retriever = vectorstore.<span class="fn">as_retriever</span>(
-        search_type=<span class="st">"similarity"</span>,
-        search_kwargs={<span class="st">"k"</span>: settings.top_k}
+    prompt = ChatPromptTemplate.from_messages(
+        [(<span class="st">"system"</span>, SYSTEM_PROMPT), (<span class="st">"human"</span>, <span class="st">"{question}"</span>)]
     )
 
-    <span class="cm"># LLM: Gemini 1.5 Flash — free tier, fast, handles long contexts well</span>
-    <span class="cm"># temperature=0.1 → more factual, less creative</span>
-    llm = <span class="fn">ChatGoogleGenerativeAI</span>(
-        model=settings.model_name,          <span class="cm"># "gemini-1.5-flash"</span>
-        temperature=settings.temperature,
-        google_api_key=settings.google_api_key,
-        convert_system_message_to_human=<span class="nm">True</span>  <span class="cm"># required for Gemini</span>
+
+    <span class="kw">def</span> <span class="fn">_build_generation_chain</span>(model_name: <span class="py">str</span>):
+        <span class="st">"""Create generation pipeline — branches on LLM_PROVIDER setting."""</span>
+        <span class="kw">if</span> settings.llm_provider == <span class="st">"groq"</span>:
+            llm = <span class="fn">ChatGroq</span>(
+                model=model_name,
+                temperature=settings.temperature,
+                api_key=settings.groq_api_key,
+            )
+        <span class="kw">else</span>:  <span class="cm"># gemini</span>
+            llm = <span class="fn">ChatGoogleGenerativeAI</span>(
+                model=model_name,
+                temperature=settings.temperature,
+                google_api_key=settings.google_api_key,
+                <span class="cm"># convert_system_message_to_human removed (deprecated in v4+)</span>
+            )
+        <span class="kw">return</span> prompt | llm | <span class="fn">StrOutputParser</span>()
+
+
+    <span class="kw">def</span> <span class="fn">ask</span>(question: <span class="py">str</span>) -> <span class="py">str</span>:
+        <span class="st">"""Single entry point. Retrieves context, then tries model candidates."""</span>
+        vectorstore = <span class="fn">get_vector_store</span>()
+        retriever = vectorstore.<span class="fn">as_retriever</span>(search_type=<span class="st">"similarity"</span>, search_kwargs={<span class="st">"k"</span>: settings.top_k})
+        context = <span class="st">"\n\n---\n\n"</span>.<span class="fn">join</span>([d.page_content <span class="kw">for</span> d <span class="kw">in</span> retriever.<span class="fn">invoke</span>(question)])
+        payload = {<span class="st">"context"</span>: context, <span class="st">"question"</span>: question}
+        candidate_models = [settings.<span class="fn">get_primary_model</span>(), *settings.<span class="fn">get_fallback_models</span>()]
+
+        <span class="kw">for</span> model_name <span class="kw">in</span> candidate_models:
+            <span class="kw">try</span>:
+                <span class="kw">return</span> <span class="fn">_build_generation_chain</span>(model_name).<span class="fn">invoke</span>(payload)
+            <span class="kw">except</span> Exception <span class="kw">as</span> exc:
+                <span class="kw">if</span> <span class="fn">_should_try_next_model</span>(<span class="py">str</span>(exc)):
+                continue
+            raise _build_llm_error(model_name, model_candidates, exc, attempt_errors) from exc
+
+    raise _build_llm_error(
+        model_candidates[-1],
+        model_candidates,
+        Exception("All configured models failed."),
+        attempt_errors,
     )
-
-    <span class="cm"># LCEL Chain: connects each step with pipe operator |</span>
-    rag_chain = (
-        {
-            <span class="st">"context"</span>: retriever | format_docs,   <span class="cm"># retrieves + formats</span>
-            <span class="st">"question"</span>: RunnablePassthrough()      <span class="cm"># passes query through</span>
-        }
-        | prompt          <span class="cm"># fills the template</span>
-        | llm             <span class="cm"># sends to LLM</span>
-        | <span class="fn">StrOutputParser</span>()  <span class="cm"># extracts text from response</span>
-    )
-
-    <span class="kw">return</span> rag_chain
-
-
-<span class="cm"># ── 4. MAIN ASK FUNCTION ────────────────────────────────────────</span>
-
-<span class="kw">def</span> <span class="fn">ask</span>(question: <span class="py">str</span>) -> <span class="py">str</span>:
-    <span class="st">"""Single entry point for the RAG chatbot."""</span>
-    chain = <span class="fn">build_rag_chain</span>()
-    <span class="kw">return</span> chain.<span class="fn">invoke</span>(question)
-
-
-<span class="cm"># ── Quick test ─────────────────────────────────────────────────</span>
-<span class="kw">if</span> __name__ == <span class="st">"__main__"</span>:
-    answer = <span class="fn">ask</span>(<span class="st">"What are the side effects of ibuprofen?"</span>)
-    <span class="fn">print</span>(<span class="st">f"\n🤖 Answer:\n{answer}"</span>)</pre>
+</pre>
   </div>
 
   <div class="callout info">
@@ -1206,71 +1255,66 @@ prompt = <span class="fn">ChatPromptTemplate</span>.<span class="fn">from_messag
   <div class="code-wrap">
     <div class="code-header">
       <div class="code-dots"><span class="dot-r"></span><span class="dot-y"></span><span class="dot-g"></span></div>
-      <span class="code-title">backend/api.py — 🔲 planned FastAPI endpoints</span>
+      <span class="code-title">backend/api.py — lifespan pre-warm + provider-agnostic error mapping</span>
       <button class="code-copy" onclick="copyCode(this)">copy</button>
     </div>
-    <pre"><span class="kw">from</span> <span class="nm">fastapi</span> <span class="kw">import</span> FastAPI, HTTPException
+    <pre><span class="kw">import</span> <span class="nm">logging</span>, <span class="nm">time</span>
+<span class="kw">from</span> <span class="nm">contextlib</span> <span class="kw">import</span> asynccontextmanager
+<span class="kw">from</span> <span class="nm">fastapi</span> <span class="kw">import</span> FastAPI, HTTPException
 <span class="kw">from</span> <span class="nm">fastapi.middleware.cors</span> <span class="kw">import</span> CORSMiddleware
+<span class="kw">from</span> <span class="nm">fastapi.responses</span> <span class="kw">import</span> Response
 <span class="kw">from</span> <span class="nm">pydantic</span> <span class="kw">import</span> BaseModel
-<span class="kw">from</span> <span class="nm">rag_engine</span> <span class="kw">import</span> ask
-<span class="kw">import</span> <span class="nm">time</span>
+<span class="kw">from</span> <span class="nm">backend.rag_engine</span> <span class="kw">import</span> ask, ModelUnavailableError, QuotaExceededError, RAGEngineError, UpstreamLLMError
+<span class="kw">from</span> <span class="nm">backend.vector_store</span> <span class="kw">import</span> get_vector_store
 
-app = <span class="fn">FastAPI</span>(
-    title=<span class="st">"AI SaaS RAG API"</span>,
-    version=<span class="st">"1.0.0"</span>
-)
+logger = logging.<span class="fn">getLogger</span>(__name__)
 
-<span class="cm"># Allow Next.js frontend to call this API</span>
-app.<span class="fn">add_middleware</span>(
-    CORSMiddleware,
+
+<span class="cm"># ── PRE-WARM at startup ────────────────────────────────────</span>
+<span class="cm"># Loads HuggingFace embedder + ChromaDB index at boot time.</span>
+<span class="cm"># Without this, the FIRST request takes ~10 seconds (model download).</span>
+<span class="cm"># With this, first request is &lt;500ms like all others.</span>
+<span class="at">@asynccontextmanager</span>
+<span class="kw">async def</span> <span class="fn">lifespan</span>(app: FastAPI):
+    t0 = time.<span class="fn">time</span>()
+    <span class="fn">get_vector_store</span>()  <span class="cm"># loads BAAI/bge-small-en-v1.5 into memory</span>
+    logger.<span class="fn">info</span>(<span class="st">f"✅ Vector store ready in {round((time.time()-t0)*1000)}ms"</span>)
+    <span class="kw">yield</span>
+
+
+app = <span class="fn">FastAPI</span>(title=<span class="st">"AI SaaS RAG API"</span>, version=<span class="st">"1.0.0"</span>, lifespan=lifespan)
+
+app.<span class="fn">add_middleware</span>(CORSMiddleware,
     allow_origins=[<span class="st">"http://localhost:3000"</span>, <span class="st">"https://yourdomain.com"</span>],
-    allow_methods=[<span class="st">"*"</span>],
-    allow_headers=[<span class="st">"*"</span>]
-)
+    allow_methods=[<span class="st">"*"</span>], allow_headers=[<span class="st">"*"</span>])
 
-
-<span class="cm"># ── Request / Response Models ────────────────────────────────</span>
-
-<span class="kw">class</span> <span class="fn">AskRequest</span>(BaseModel):
-    question: <span class="py">str</span>
-    chat_id: <span class="py">str</span> = <span class="st">"default"</span>  <span class="cm"># for future multi-session support</span>
-
-<span class="kw">class</span> <span class="fn">AskResponse</span>(BaseModel):
-    answer: <span class="py">str</span>
-    latency_ms: <span class="py">float</span>
-    chat_id: <span class="py">str</span>
-
-
-<span class="cm"># ── Endpoints ───────────────────────────────────────────────</span>
 
 <span class="at">@app.get</span>(<span class="st">"/"</span>)
-<span class="kw">async def</span> <span class="fn">health</span>():
-    <span class="kw">return</span> {<span class="st">"status"</span>: <span class="st">"ok"</span>, <span class="st">"service"</span>: <span class="st">"AI SaaS RAG API"</span>}
+<span class="kw">async def</span> <span class="fn">health</span>(): <span class="kw">return</span> {<span class="st">"status"</span>: <span class="st">"ok"</span>, <span class="st">"service"</span>: <span class="st">"AI SaaS RAG API"</span>}
 
 
-<span class="at">@app.post</span>(<span class="st">"/ask"</span>, response_model=AskResponse)
-<span class="kw">async def</span> <span class="fn">ask_endpoint</span>(req: <span class="fn">AskRequest</span>):
-    <span class="st">"""Main chatbot endpoint."""</span>
+<span class="at">@app.get</span>(<span class="st">"/favicon.ico"</span>, include_in_schema=<span class="nm">False</span>)
+<span class="kw">async def</span> <span class="fn">favicon</span>(): <span class="kw">return</span> <span class="fn">Response</span>(status_code=<span class="nm">204</span>)  <span class="cm"># silence browser 404 noise</span>
+
+
+<span class="at">@app.post</span>(<span class="st">"/ask"</span>)
+<span class="kw">async def</span> <span class="fn">ask_endpoint</span>(req: AskRequest):
     <span class="kw">if not</span> req.question.<span class="fn">strip</span>():
-        <span class="kw">raise</span> <span class="fn">HTTPException</span>(status_code=<span class="nm">400</span>, detail=<span class="st">"Question cannot be empty"</span>)
-
+        <span class="kw">raise</span> <span class="fn">HTTPException</span>(status_code=<span class="nm">400</span>, detail=<span class="st">"Question cannot be empty."</span>)
     <span class="kw">try</span>:
         start = time.<span class="fn">time</span>()
-        answer = <span class="fn">ask</span>(req.question)   <span class="cm"># calls our RAG engine</span>
-        latency = (time.<span class="fn">time</span>() - start) * <span class="nm">1000</span>
-
-        <span class="kw">return</span> <span class="fn">AskResponse</span>(
-            answer=answer,
-            latency_ms=<span class="fn">round</span>(latency, <span class="nm">2</span>),
-            chat_id=req.chat_id
-        )
-
-    <span class="kw">except</span> <span class="fn">Exception</span> <span class="kw">as</span> e:
-        <span class="kw">raise</span> <span class="fn">HTTPException</span>(status_code=<span class="nm">500</span>, detail=<span class="py">str</span>(e))
-
-
-<span class="cm"># ── Run ─────────────────────────────────────────────────────</span>
-<span class="cm"># uvicorn api:app --reload --port 8000</span></pre>
+        answer = <span class="fn">ask</span>(req.question)
+        <span class="kw">return</span> AskResponse(answer=answer, latency_ms=<span class="fn">round</span>((time.<span class="fn">time</span>()-start)*<span class="nm">1000</span>,<span class="nm">2</span>), chat_id=req.chat_id)
+    <span class="kw">except</span> QuotaExceededError <span class="kw">as</span> exc:
+        <span class="kw">raise</span> <span class="fn">HTTPException</span>(status_code=<span class="nm">503</span>, detail=<span class="st">f"LLM quota exceeded: {exc}"</span>) <span class="kw">from</span> exc
+    <span class="kw">except</span> ModelUnavailableError <span class="kw">as</span> exc:
+        <span class="kw">raise</span> <span class="fn">HTTPException</span>(status_code=<span class="nm">502</span>, detail=<span class="st">f"LLM unavailable: {exc}"</span>) <span class="kw">from</span> exc
+    <span class="kw">except</span> UpstreamLLMError <span class="kw">as</span> exc:
+        <span class="kw">raise</span> <span class="fn">HTTPException</span>(status_code=<span class="nm">502</span>, detail=<span class="st">f"LLM call failed: {exc}"</span>) <span class="kw">from</span> exc
+    <span class="kw">except</span> Exception <span class="kw">as</span> exc:
+        logger.<span class="fn">exception</span>(<span class="st">"Unexpected error in /ask"</span>)
+        <span class="kw">raise</span> <span class="fn">HTTPException</span>(status_code=<span class="nm">500</span>, detail=<span class="st">"Unexpected internal server error."</span>) <span class="kw">from</span> exc
+</pre>
   </div>
 
   <div class="code-wrap">
@@ -1279,20 +1323,38 @@ app.<span class="fn">add_middleware</span>(
       <span class="code-title">terminal — start the server</span>
       <button class="code-copy" onclick="copyCode(this)">copy</button>
     </div>
-    <pre">uvicorn backend.api:app --reload --port 8000
+    <pre><span class="cm"># ── One-command start (recommended) ─────────────────────────</span>
+bash start.sh
 
-<span class="cm"># Test it:</span>
+<span class="cm"># ── Or manually ───────────────────────────────────────────</span>
+conda activate AI_SaaS
+export PYTHONPATH="$(pwd)"
+python -m uvicorn backend.api:app --reload --port 8000
+
+<span class="cm"># ── Test endpoints ───────────────────────────────────────</span>
+curl http://localhost:8000/              <span class="cm"># health check → {"status":"ok"}</span>
+curl http://localhost:8000/docs          <span class="cm"># interactive Swagger UI</span>
 curl -X POST http://localhost:8000/ask \
   -H <span class="st">"Content-Type: application/json"</span> \
-  -d <span class="st">'{"question": "What are the side effects of ibuprofen?"}'</span>
+  -d <span class="st">'{"question": "What pricing plans are available?"}'</span>
 
-<span class="cm"># Response:</span>
-<span class="cm"># { "answer": "Ibuprofen can cause nausea, dizziness...", "latency_ms": 842 }</span></pre>
+<span class="cm"># ✅ Expected response:</span>
+<span class="cm"># {"answer": "The pricing tiers are...", "latency_ms": 412.3, "chat_id": "default"}</span></pre>
   </div>
 
   <div class="callout good">
     <span class="callout-icon">✅</span>
     <p><strong>Auto-docs:</strong> FastAPI generates interactive API docs at <code>http://localhost:8000/docs</code> — you can test every endpoint from the browser. Share this with your frontend team.</p>
+  </div>
+
+  <div class="callout warn">
+    <span class="callout-icon">⚠️</span>
+    <p><strong>LLM error diagnosis:</strong> <code>RESOURCE_EXHAUSTED (429)</code> → quota/rate limit hit (switch to Groq or wait for reset). <code>NOT_FOUND (404)</code> → model name wrong or unavailable for your key. <code>INVALID_ARGUMENT (400)</code> → API key invalid or malformed in <code>.env</code>.</p>
+  </div>
+
+  <div class="callout good">
+    <span class="callout-icon">✅</span>
+    <p><strong>Startup pre-warm:</strong> The <code>lifespan</code> handler loads the embedding model at boot. First request latency drops from <strong>~10 seconds</strong> to <strong>~400ms</strong>. Always check startup logs for <code>✅ Vector store ready</code> before testing.</p>
   </div>
 </section>
 
@@ -1306,6 +1368,21 @@ curl -X POST http://localhost:8000/ask \
     <h2>Production-Level Improvements</h2>
   </div>
   <p class="lead">The basic RAG works. Now here's what separates a toy from a real product.</p>
+
+  <div class="table-wrap">
+    <table>
+      <tr><th>Provider</th><th>Model</th><th>Free RPD</th><th>Latency</th><th>Use Case</th></tr>
+      <tr><td>Groq ✅ Active</td><td>llama-3.3-70b-versatile</td><td>14,400</td><td>~300ms</td><td>Development &amp; production</td></tr>
+      <tr><td>Groq</td><td>llama-3.1-8b-instant</td><td>14,400</td><td>~150ms</td><td>Fallback, ultra-fast</td></tr>
+      <tr><td>Gemini (backup)</td><td>gemini-2.0-flash-lite</td><td>1,500</td><td>~800ms</td><td>Production with billing</td></tr>
+      <tr><td>Gemini (backup)</td><td>gemini-2.0-flash</td><td>1,500</td><td>~1,000ms</td><td>Higher quality fallback</td></tr>
+    </table>
+  </div>
+
+  <div class="callout good">
+    <span class="callout-icon">⚡</span>
+    <p><strong>Why Groq for your product?</strong> 14,400 free requests/day vs Gemini's 1,500. At ~500 tokens/sec inference speed, it's also 5x faster. Switch with <code>LLM_PROVIDER=gemini</code> when you're ready for production billing.</p>
+  </div>
 
   <div class="steps">
     <div class="step">
@@ -1551,9 +1628,8 @@ MAX_HISTORY = <span class="nm">10</span>  <span class="cm"># keep last 10 messag
       <button class="code-copy" onclick="copyCode(this)">copy</button>
     </div>
     <pre><span class="kw">from</span> <span class="nm">langchain_google_genai</span> <span class="kw">import</span> ChatGoogleGenerativeAI
-<span class="kw">from</span> <span class="nm">langchain.prompts</span> <span class="kw">import</span> ChatPromptTemplate
-<span class="kw">from</span> <span class="nm">langchain.schema.runnable</span> <span class="kw">import</span> RunnablePassthrough
-<span class="kw">from</span> <span class="nm">langchain.schema.output_parser</span> <span class="kw">import</span> StrOutputParser
+<span class="kw">from</span> <span class="nm">langchain_core.prompts</span> <span class="kw">import</span> ChatPromptTemplate
+<span class="kw">from</span> <span class="nm">langchain_core.output_parsers</span> <span class="kw">import</span> StrOutputParser
 <span class="kw">from</span> <span class="nm">vector_store</span> <span class="kw">import</span> get_vector_store
 <span class="kw">from</span> <span class="nm">memory</span> <span class="kw">import</span> get_history, add_turn, format_history_for_prompt
 <span class="kw">from</span> <span class="nm">config</span> <span class="kw">import</span> settings
@@ -1634,8 +1710,16 @@ prompt = <span class="fn">ChatPromptTemplate</span>.<span class="fn">from_messag
         answer = <span class="fn">ask</span>(req.question, chat_id=req.chat_id)  <span class="cm"># passes chat_id</span>
         latency = (time.<span class="fn">time</span>() - start) * <span class="nm">1000</span>
         <span class="kw">return</span> <span class="fn">AskResponse</span>(answer=answer, latency_ms=<span class="fn">round</span>(latency, <span class="nm">2</span>), chat_id=req.chat_id)
-    <span class="kw">except</span> <span class="fn">Exception</span> <span class="kw">as</span> e:
-        <span class="kw">raise</span> <span class="fn">HTTPException</span>(status_code=<span class="nm">500</span>, detail=<span class="py">str</span>(e))
+    <span class="kw">except</span> QuotaExceededError <span class="kw">as</span> exc:
+        <span class="kw">raise</span> <span class="fn">HTTPException</span>(status_code=<span class="nm">503</span>, detail=<span class="st">f"Quota exceeded: {exc}"</span>)
+    <span class="kw">except</span> ModelUnavailableError <span class="kw">as</span> exc:
+        <span class="kw">raise</span> <span class="fn">HTTPException</span>(status_code=<span class="nm">502</span>, detail=<span class="st">f"Model unavailable: {exc}"</span>)
+    <span class="kw">except</span> UpstreamLLMError <span class="kw">as</span> exc:
+        <span class="kw">raise</span> <span class="fn">HTTPException</span>(status_code=<span class="nm">502</span>, detail=<span class="st">f"LLM provider failed: {exc}"</span>)
+    <span class="kw">except</span> RAGEngineError <span class="kw">as</span> exc:
+        <span class="kw">raise</span> <span class="fn">HTTPException</span>(status_code=<span class="nm">500</span>, detail=<span class="st">f"RAG engine failed: {exc}"</span>)
+    <span class="kw">except</span> <span class="fn">Exception</span> <span class="kw">as</span> exc:
+        <span class="kw">raise</span> <span class="fn">HTTPException</span>(status_code=<span class="nm">500</span>, detail=<span class="st">"Unexpected internal server error."</span>)
 
 
 <span class="at">@app.delete</span>(<span class="st">"/chat/{chat_id}"</span>)
@@ -1809,7 +1893,7 @@ Thumbs.db</pre>
         <h4>PYTHONPATH exported so imports resolve</h4>
         <p>Run: <code>export PYTHONPATH=$PYTHONPATH:$(pwd)/backend</code><br>
         Verify: <code>python -c "from config import settings; print(settings.model_name)"</code><br>
-        Should print: <code>gemini-1.5-flash</code></p>
+        Should print your configured primary model (default: <code>gemini-2.0-flash</code>)</p>
       </div>
     </div>
 
@@ -1923,7 +2007,7 @@ Thumbs.db</pre>
     AI_SaaS · RAG Engineering Guide · 13 Sections · Production-Ready
   </div>
   <p style="color:var(--muted);font-size:0.8rem;margin-top:0.75rem;max-width:480px;margin-left:auto;margin-right:auto">
-    Stack: Gemini 1.5 Flash · HuggingFace BGE embeddings · ChromaDB → Pinecone · FastAPI · Next.js
+    Stack: Gemini (primary + fallback) · HuggingFace BGE embeddings · ChromaDB → Pinecone · FastAPI · Next.js
   </p>
 </footer>
 
