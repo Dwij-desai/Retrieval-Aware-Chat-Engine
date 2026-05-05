@@ -3,8 +3,9 @@ from __future__ import annotations
 import re
 
 from langchain_core.documents import Document
+from langchain_core.messages import AIMessage, HumanMessage
 from langchain_core.output_parsers import StrOutputParser
-from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_groq import ChatGroq
 
@@ -28,13 +29,18 @@ You are a knowledgeable and helpful AI assistant.
 Your rules:
     1. Answer ONLY using the provided context below.
     2. If the answer is not in the context, say: "I don't have enough information to answer that accurately."
-    3. Be concise. Cite context when possible.
-    4. Never make up information.
+    3. Use conversation history to resolve follow-ups (e.g., "it", "they").
+    4. Be concise. Do not repeat earlier answers unless asked.
+    5. Never make up information.
 Context: {context}
 """
 
 prompt = ChatPromptTemplate.from_messages(
-    [("system", SYSTEM_PROMPT), ("human", "{question}")]
+    [
+        ("system", SYSTEM_PROMPT),
+        MessagesPlaceholder("history"),
+        ("human", "{question}"),
+    ]
 )
 
 
@@ -92,14 +98,40 @@ def _build_generation_chain(model_name: str):
     return prompt | llm | StrOutputParser()
 
 
-def _retrieve_context(question: str) -> str:
+def _history_to_messages(chat_history: list[tuple[str, str]] | None) -> list:
+    """Convert stored chat history into LangChain message objects."""
+    if not chat_history:
+        return []
+    messages = []
+    for role, content in chat_history:
+        if role == "user":
+            messages.append(HumanMessage(content=content))
+        elif role == "assistant":
+            messages.append(AIMessage(content=content))
+    return messages
+
+
+def _build_retrieval_query(
+    question: str, chat_history: list[tuple[str, str]] | None
+) -> str:
+    """Blend recent chat history into the retrieval query for follow-ups."""
+    if not chat_history:
+        return question
+    recent = chat_history[-4:]
+    history_lines = [f"{role}: {content}" for role, content in recent]
+    history_block = "\n".join(history_lines)
+    return f"Conversation history:\n{history_block}\nFollow-up question: {question}"
+
+
+def _retrieve_context(question: str, chat_history: list[tuple[str, str]] | None) -> str:
     """Retrieve top-k chunks once and join them as model context."""
     vectorstore = get_vector_store()
     retriever = vectorstore.as_retriever(
         search_type="similarity",
         search_kwargs={"k": settings.top_k},
     )
-    docs = retriever.invoke(question)
+    retrieval_query = _build_retrieval_query(question, chat_history)
+    docs = retriever.invoke(retrieval_query)
     return format_docs(docs)
 
 
@@ -203,10 +235,11 @@ def build_rag_chain(model_name: str):
 
 
 # ── 6. MAIN ASK FUNCTION ────────────────────────────────────────
-def ask(question: str) -> str:
+def ask(question: str, chat_history: list[tuple[str, str]] | None = None) -> str:
     """Single entry point for the RAG chatbot with model fallback."""
-    context = _retrieve_context(question)
-    payload = {"context": context, "question": question}
+    context = _retrieve_context(question, chat_history)
+    history_messages = _history_to_messages(chat_history)
+    payload = {"context": context, "question": question, "history": history_messages}
     candidate_models = _ordered_model_candidates()
     if not candidate_models:
         raise ModelUnavailableError(

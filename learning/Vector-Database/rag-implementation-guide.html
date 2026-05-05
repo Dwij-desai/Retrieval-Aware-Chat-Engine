@@ -10,6 +10,7 @@
   --bg: #0c0e14;
   --surface: #12141c;
   --card: #181a24;
+  --code-bg: #0d0f18;
   --border: #1e2030;
   --border2: #252840;
   --accent: #79b8ff;
@@ -24,6 +25,25 @@
   --text2: #adbac7;
   --mono: 'JetBrains Mono', monospace;
   --sans: 'Familjen Grotesk', sans-serif;
+}
+
+body.light-mode {
+  --bg: #f7f9fc;
+  --surface: #ffffff;
+  --card: #f3f6fb;
+  --code-bg: #fbfdff;
+  --border: #d9e1ee;
+  --border2: #c8d4e6;
+  --accent: #1f6feb;
+  --green: #2b8a3e;
+  --yellow: #9a6b00;
+  --red: #c0392b;
+  --purple: #6f42c1;
+  --orange: #c96a00;
+  --teal: #1f8f63;
+  --muted: #5b6c87;
+  --text: #122238;
+  --text2: #2b3f59;
 }
 
 * { margin:0; padding:0; box-sizing:border-box; }
@@ -43,6 +63,27 @@ body {
   position: fixed; top:0; left:0; height:2px; width:0%;
   background: linear-gradient(90deg, #79b8ff, #56d364, #bc8cff);
   z-index:9999; transition: width .1s;
+}
+
+.theme-toggle {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 1000;
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
+  color: var(--text);
+  background: var(--card);
+  border: 1px solid var(--border2);
+  border-radius: 999px;
+  padding: 0.45rem 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.theme-toggle:hover {
+  border-color: var(--accent);
+  color: var(--accent);
 }
 
 /* ── SIDEBAR NAV ── */
@@ -169,7 +210,7 @@ body {
 
 /* ── CODE BLOCKS ── */
 .code-wrap {
-  background: #0d0f18;
+  background: var(--code-bg);
   border: 1px solid var(--border2);
   border-radius: 0.5rem;
   margin: 1.5rem 0;
@@ -251,7 +292,7 @@ pre {
 .tree {
   font-family: var(--mono); font-size: 0.78rem;
   line-height: 1.9; color: var(--text2);
-  background: #0d0f18; border: 1px solid var(--border2);
+  background: var(--code-bg); border: 1px solid var(--border2);
   border-radius: 0.5rem; padding: 1.25rem 1.5rem;
   margin: 1.25rem 0;
 }
@@ -305,17 +346,29 @@ td:first-child { font-family: var(--mono); font-size: 0.75rem; color: var(--acce
 .mistake-card .fix { color: var(--green); font-size: 0.78rem; margin-top: 0.5rem; }
 .mistake-card p { font-size: 0.78rem; color: var(--muted); line-height: 1.6; }
 
+body.light-mode .kw  { color: #ad2f2f; }
+body.light-mode .fn  { color: #6f42c1; }
+body.light-mode .st  { color: #116329; }
+body.light-mode .cm  { color: #6b7280; }
+body.light-mode .nm  { color: #1d4ed8; }
+body.light-mode .op  { color: #0f5cc0; }
+body.light-mode .dc  { color: #0c7a42; }
+body.light-mode .py  { color: #b45309; }
+body.light-mode .at  { color: #8a5800; }
+
 /* ── RESPONSIVE ── */
 @media(max-width:768px){
   .sidebar { display:none; }
   .main { margin-left: 0; }
   .section, .hero { padding: 2rem 1.25rem; }
+  .theme-toggle { top: 0.75rem; right: 0.75rem; }
 }
 </style>
 </head>
 <body>
 
 <div id="prog"></div>
+<button id="theme-toggle" class="theme-toggle" type="button" aria-pressed="false">Light mode</button>
 
 <!-- ── SIDEBAR ── -->
 <aside class="sidebar">
@@ -449,7 +502,7 @@ td:first-child { font-family: var(--mono); font-size: 0.75rem; color: var(--acce
     <span class="sec-num">SECTION 02</span>
     <h2>Environment Setup</h2>
   </div>
-  <p class="lead">Using Conda for environment management — better dependency isolation, Python version control, and easier to manage across AI/ML projects. We'll use ChromaDB (local, no server needed) to start. <strong>No OpenAI needed</strong> — we use Google Gemini (free tier) for the LLM and HuggingFace for embeddings.</p>
+  <p class="lead">Using Conda for environment management — better dependency isolation, Python version control, and easier to manage across AI/ML projects. We'll use ChromaDB (local, no server needed) to start. <strong>No OpenAI needed</strong> — this repo uses Groq as the default LLM provider (Gemini as backup) and HuggingFace for embeddings.</p>
 
   <div class="code-wrap">
     <div class="code-header">
@@ -474,7 +527,7 @@ python --version           <span class="cm"># should show Python 3.11.x</span></
       <span class="code-title">terminal — install all dependencies</span>
       <button class="code-copy" onclick="copyCode(this)">copy</button>
     </div>
-    <pre><span class="cm"># Install via pip inside the conda env (conda activate AI_SaaS first!)</span>
+    <pre><span class="cm"># Install via pip inside the conda env (conda activate ai_saas first!)</span>
 pip install langchain langchain-google-genai langchain-groq \
             langchain-community langchain-chroma langchain-huggingface \
             langchain-text-splitters fastapi uvicorn \
@@ -553,6 +606,10 @@ pip freeze > requirements.txt</pre>
     chunk_overlap: <span class="py">int</span> = <span class="nm">50</span>
     temperature: <span class="py">float</span> = <span class="nm">0.1</span>
 
+    <span class="cm"># ── CHAT MEMORY (SQLite) ─────────────────────────────────────</span>
+    memory_db_path: <span class="py">str</span> = <span class="st">"./chat_memory.db"</span>
+    memory_max_messages: <span class="py">int</span> = <span class="nm">6</span>
+
     <span class="kw">def</span> <span class="fn">get_primary_model</span>(self) -> <span class="py">str</span>:
         <span class="st">"""Return primary model for the active provider."""</span>
         <span class="kw">return</span> self.groq_model_name <span class="kw">if</span> self.llm_provider == <span class="st">"groq"</span> <span class="kw">else</span> self.model_name
@@ -585,7 +642,11 @@ GROQ_FALLBACK_MODEL_NAMES=llama-3.1-8b-instant
 <span class="cm"># ── GEMINI (backup — aistudio.google.com) ─────────────────────</span>
 GOOGLE_API_KEY=AIzaSy_your_gemini_key_here
 MODEL_NAME=gemini-2.0-flash-lite
-FALLBACK_MODEL_NAMES=gemini-2.0-flash</pre>
+FALLBACK_MODEL_NAMES=gemini-2.0-flash
+
+<span class="cm"># ── MEMORY (optional) ─────────────────────────────────────────</span>
+MEMORY_DB_PATH=./chat_memory.db
+MEMORY_MAX_MESSAGES=6</pre>
   </div>
 
   <div class="callout good">
@@ -1169,70 +1230,99 @@ FALLBACK_MODEL_NAMES=gemini-2.0-flash</pre>
       <span class="code-title">backend/rag_engine.py — multi-provider, fallback + typed errors</span>
       <button class="code-copy" onclick="copyCode(this)">copy</button>
     </div>
-    <span class="kw">from</span> <span class="nm">langchain_google_genai</span> <span class="kw">import</span> ChatGoogleGenerativeAI
-    <span class="kw">from</span> <span class="nm">langchain_groq</span> <span class="kw">import</span> ChatGroq  <span class="cm"># ✅ Groq support added</span>
-    <span class="kw">from</span> <span class="nm">langchain_core.output_parsers</span> <span class="kw">import</span> StrOutputParser
-    <span class="kw">from</span> <span class="nm">langchain_core.prompts</span> <span class="kw">import</span> ChatPromptTemplate
+    <pre>from langchain_core.messages import AIMessage, HumanMessage
+from langchain_core.output_parsers import StrOutputParser
+from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
+from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_groq import ChatGroq
 
-    <span class="kw">from</span> <span class="nm">backend.config</span> <span class="kw">import</span> settings
-    <span class="kw">from</span> <span class="nm">backend.vector_store</span> <span class="kw">import</span> get_vector_store
+from backend.config import settings
+from backend.vector_store import get_vector_store
 
+SYSTEM_PROMPT = """
+You are a knowledgeable and helpful AI assistant.
+Your rules:
+    1. Answer ONLY using the provided context below.
+    2. If the answer is not in the context, say: "I don't have enough information to answer that accurately."
+    3. Use conversation history to resolve follow-ups.
+    4. Never make up information.
+Context: {context}
+"""
 
-    SYSTEM_PROMPT = <span class="st">"""
-    You are a knowledgeable and helpful AI assistant.
-    Your rules:
-        1. Answer ONLY using the provided context below.
-        2. If the answer is not in the context, say: "I don't have enough information."
-        3. Be concise. Never make up information.
-    Context: {context}
-    """</span>
-
-    prompt = ChatPromptTemplate.from_messages(
-        [(<span class="st">"system"</span>, SYSTEM_PROMPT), (<span class="st">"human"</span>, <span class="st">"{question}"</span>)]
-    )
-
-
-    <span class="kw">def</span> <span class="fn">_build_generation_chain</span>(model_name: <span class="py">str</span>):
-        <span class="st">"""Create generation pipeline — branches on LLM_PROVIDER setting."""</span>
-        <span class="kw">if</span> settings.llm_provider == <span class="st">"groq"</span>:
-            llm = <span class="fn">ChatGroq</span>(
-                model=model_name,
-                temperature=settings.temperature,
-                api_key=settings.groq_api_key,
-            )
-        <span class="kw">else</span>:  <span class="cm"># gemini</span>
-            llm = <span class="fn">ChatGoogleGenerativeAI</span>(
-                model=model_name,
-                temperature=settings.temperature,
-                google_api_key=settings.google_api_key,
-                <span class="cm"># convert_system_message_to_human removed (deprecated in v4+)</span>
-            )
-        <span class="kw">return</span> prompt | llm | <span class="fn">StrOutputParser</span>()
+prompt = ChatPromptTemplate.from_messages(
+    [
+        ("system", SYSTEM_PROMPT),
+        MessagesPlaceholder("history"),
+        ("human", "{question}"),
+    ]
+)
 
 
-    <span class="kw">def</span> <span class="fn">ask</span>(question: <span class="py">str</span>) -> <span class="py">str</span>:
-        <span class="st">"""Single entry point. Retrieves context, then tries model candidates."""</span>
-        vectorstore = <span class="fn">get_vector_store</span>()
-        retriever = vectorstore.<span class="fn">as_retriever</span>(search_type=<span class="st">"similarity"</span>, search_kwargs={<span class="st">"k"</span>: settings.top_k})
-        context = <span class="st">"\n\n---\n\n"</span>.<span class="fn">join</span>([d.page_content <span class="kw">for</span> d <span class="kw">in</span> retriever.<span class="fn">invoke</span>(question)])
-        payload = {<span class="st">"context"</span>: context, <span class="st">"question"</span>: question}
-        candidate_models = [settings.<span class="fn">get_primary_model</span>(), *settings.<span class="fn">get_fallback_models</span>()]
+class RAGEngineError(Exception):
+    """Base class for RAG engine failures."""
 
-        <span class="kw">for</span> model_name <span class="kw">in</span> candidate_models:
-            <span class="kw">try</span>:
-                <span class="kw">return</span> <span class="fn">_build_generation_chain</span>(model_name).<span class="fn">invoke</span>(payload)
-            <span class="kw">except</span> Exception <span class="kw">as</span> exc:
-                <span class="kw">if</span> <span class="fn">_should_try_next_model</span>(<span class="py">str</span>(exc)):
-                continue
-            raise _build_llm_error(model_name, model_candidates, exc, attempt_errors) from exc
 
-    raise _build_llm_error(
-        model_candidates[-1],
-        model_candidates,
-        Exception("All configured models failed."),
-        attempt_errors,
-    )
-</pre>
+class UpstreamLLMError(RAGEngineError):
+    """Raised when all model attempts fail."""
+
+
+def _ordered_model_candidates() -> list[str]:
+    ordered = [settings.get_primary_model(), *settings.get_fallback_models()]
+    deduped = []
+    for model_name in ordered:
+        model_name = model_name.strip()
+        if model_name and model_name not in deduped:
+            deduped.append(model_name)
+    return deduped
+
+
+def _build_generation_chain(model_name: str):
+    if settings.llm_provider == "groq":
+        llm = ChatGroq(model=model_name, temperature=settings.temperature, api_key=settings.groq_api_key)
+    else:
+        llm = ChatGoogleGenerativeAI(
+            model=model_name,
+            temperature=settings.temperature,
+            google_api_key=settings.google_api_key,
+        )
+    return prompt | llm | StrOutputParser()
+
+
+def _history_to_messages(chat_history: list[tuple[str, str]] | None) -> list:
+    if not chat_history:
+        return []
+    messages = []
+    for role, content in chat_history:
+        if role == "user":
+            messages.append(HumanMessage(content=content))
+        elif role == "assistant":
+            messages.append(AIMessage(content=content))
+    return messages
+
+
+def _build_retrieval_query(question: str, chat_history: list[tuple[str, str]] | None) -> str:
+    if not chat_history:
+        return question
+    recent = chat_history[-4:]
+    history_block = "\n".join([f"{role}: {content}" for role, content in recent])
+    return f"Conversation history:\n{history_block}\nFollow-up question: {question}"
+
+
+def ask(question: str, chat_history: list[tuple[str, str]] | None = None) -> str:
+    vectorstore = get_vector_store()
+    retriever = vectorstore.as_retriever(search_type="similarity", search_kwargs={"k": settings.top_k})
+    retrieval_query = _build_retrieval_query(question, chat_history)
+    docs = retriever.invoke(retrieval_query)
+    context = "\n\n---\n\n".join([doc.page_content for doc in docs])
+    payload = {"context": context, "question": question, "history": _history_to_messages(chat_history)}
+
+    for model_name in _ordered_model_candidates():
+        try:
+            return _build_generation_chain(model_name=model_name).invoke(payload)
+        except Exception:
+            continue
+
+    raise UpstreamLLMError("All configured models failed.")</pre>
   </div>
 
   <div class="callout info">
@@ -1264,6 +1354,8 @@ FALLBACK_MODEL_NAMES=gemini-2.0-flash</pre>
 <span class="kw">from</span> <span class="nm">fastapi.middleware.cors</span> <span class="kw">import</span> CORSMiddleware
 <span class="kw">from</span> <span class="nm">fastapi.responses</span> <span class="kw">import</span> Response
 <span class="kw">from</span> <span class="nm">pydantic</span> <span class="kw">import</span> BaseModel
+<span class="kw">from</span> <span class="nm">backend.config</span> <span class="kw">import</span> settings
+<span class="kw">from</span> <span class="nm">backend.memory</span> <span class="kw">import</span> add_message, get_history, init_db
 <span class="kw">from</span> <span class="nm">backend.rag_engine</span> <span class="kw">import</span> ask, ModelUnavailableError, QuotaExceededError, RAGEngineError, UpstreamLLMError
 <span class="kw">from</span> <span class="nm">backend.vector_store</span> <span class="kw">import</span> get_vector_store
 
@@ -1271,11 +1363,12 @@ logger = logging.<span class="fn">getLogger</span>(__name__)
 
 
 <span class="cm"># ── PRE-WARM at startup ────────────────────────────────────</span>
-<span class="cm"># Loads HuggingFace embedder + ChromaDB index at boot time.</span>
+<span class="cm"># Initializes chat memory + loads embedder + ChromaDB index.</span>
 <span class="cm"># Without this, the FIRST request takes ~10 seconds (model download).</span>
 <span class="cm"># With this, first request is &lt;500ms like all others.</span>
 <span class="at">@asynccontextmanager</span>
 <span class="kw">async def</span> <span class="fn">lifespan</span>(app: FastAPI):
+    <span class="fn">init_db</span>()
     t0 = time.<span class="fn">time</span>()
     <span class="fn">get_vector_store</span>()  <span class="cm"># loads BAAI/bge-small-en-v1.5 into memory</span>
     logger.<span class="fn">info</span>(<span class="st">f"✅ Vector store ready in {round((time.time()-t0)*1000)}ms"</span>)
@@ -1297,13 +1390,16 @@ app.<span class="fn">add_middleware</span>(CORSMiddleware,
 <span class="kw">async def</span> <span class="fn">favicon</span>(): <span class="kw">return</span> <span class="fn">Response</span>(status_code=<span class="nm">204</span>)  <span class="cm"># silence browser 404 noise</span>
 
 
-<span class="at">@app.post</span>(<span class="st">"/ask"</span>)
+<span class="at">@app.post</span>(<span class="st">"/ask"</span>, response_model=AskResponse)
 <span class="kw">async def</span> <span class="fn">ask_endpoint</span>(req: AskRequest):
     <span class="kw">if not</span> req.question.<span class="fn">strip</span>():
         <span class="kw">raise</span> <span class="fn">HTTPException</span>(status_code=<span class="nm">400</span>, detail=<span class="st">"Question cannot be empty."</span>)
     <span class="kw">try</span>:
         start = time.<span class="fn">time</span>()
-        answer = <span class="fn">ask</span>(req.question)
+        history = <span class="fn">get_history</span>(req.chat_id, limit=settings.memory_max_messages)
+        answer = <span class="fn">ask</span>(req.question, chat_history=history)
+        <span class="fn">add_message</span>(req.chat_id, <span class="st">"user"</span>, req.question)
+        <span class="fn">add_message</span>(req.chat_id, <span class="st">"assistant"</span>, answer)
         <span class="kw">return</span> AskResponse(answer=answer, latency_ms=<span class="fn">round</span>((time.<span class="fn">time</span>()-start)*<span class="nm">1000</span>,<span class="nm">2</span>), chat_id=req.chat_id)
     <span class="kw">except</span> QuotaExceededError <span class="kw">as</span> exc:
         <span class="kw">raise</span> <span class="fn">HTTPException</span>(status_code=<span class="nm">503</span>, detail=<span class="st">f"LLM quota exceeded: {exc}"</span>) <span class="kw">from</span> exc
@@ -1311,6 +1407,8 @@ app.<span class="fn">add_middleware</span>(CORSMiddleware,
         <span class="kw">raise</span> <span class="fn">HTTPException</span>(status_code=<span class="nm">502</span>, detail=<span class="st">f"LLM unavailable: {exc}"</span>) <span class="kw">from</span> exc
     <span class="kw">except</span> UpstreamLLMError <span class="kw">as</span> exc:
         <span class="kw">raise</span> <span class="fn">HTTPException</span>(status_code=<span class="nm">502</span>, detail=<span class="st">f"LLM call failed: {exc}"</span>) <span class="kw">from</span> exc
+    <span class="kw">except</span> RAGEngineError <span class="kw">as</span> exc:
+        <span class="kw">raise</span> <span class="fn">HTTPException</span>(status_code=<span class="nm">500</span>, detail=<span class="st">f"RAG engine error: {exc}"</span>) <span class="kw">from</span> exc
     <span class="kw">except</span> Exception <span class="kw">as</span> exc:
         logger.<span class="fn">exception</span>(<span class="st">"Unexpected error in /ask"</span>)
         <span class="kw">raise</span> <span class="fn">HTTPException</span>(status_code=<span class="nm">500</span>, detail=<span class="st">"Unexpected internal server error."</span>) <span class="kw">from</span> exc
@@ -1416,8 +1514,8 @@ curl -X POST http://localhost:8000/ask \
     <div class="step">
       <span class="step-num">05</span>
       <div class="step-content">
-        <h4>Chat History (Conversational RAG)</h4>
-        <p>Add conversation memory. Store last N messages in Redis, inject them into the prompt. Use LangChain's <code>ConversationalRetrievalChain</code> for this pattern.</p>
+        <h4>Persistent Chat Memory (Implemented)</h4>
+        <p>This project already stores recent messages in SQLite (<code>chat_memory.db</code>) and injects them with <code>MessagesPlaceholder("history")</code>. At larger scale, move the same interface to Redis or Postgres.</p>
       </div>
     </div>
   </div>
@@ -1428,7 +1526,7 @@ curl -X POST http://localhost:8000/ask \
       <span class="code-title">Metadata filtering example</span>
       <button class="code-copy" onclick="copyCode(this)">copy</button>
     </div>
-    <pre"><span class="cm"># Filter by category BEFORE doing similarity search</span>
+    <pre><span class="cm"># Filter by category BEFORE doing similarity search</span>
 <span class="cm"># Much more accurate for multi-domain systems like yours</span>
 
 retriever = vectorstore.<span class="fn">as_retriever</span>(
@@ -1452,7 +1550,7 @@ retriever = vectorstore.<span class="fn">as_retriever</span>(
       <span class="code-title">Streaming response in FastAPI</span>
       <button class="code-copy" onclick="copyCode(this)">copy</button>
     </div>
-    <pre"><span class="kw">from</span> <span class="nm">fastapi.responses</span> <span class="kw">import</span> StreamingResponse
+    <pre><span class="kw">from</span> <span class="nm">fastapi.responses</span> <span class="kw">import</span> StreamingResponse
 
 <span class="at">@app.post</span>(<span class="st">"/ask/stream"</span>)
 <span class="kw">async def</span> <span class="fn">ask_stream</span>(req: <span class="fn">AskRequest</span>):
@@ -1522,7 +1620,7 @@ retriever = vectorstore.<span class="fn">as_retriever</span>(
 
   <div class="callout good" style="margin-top:2rem">
     <span class="callout-icon">🎯</span>
-    <p><strong>Your current implemented foundation:</strong> You have <code>config.py</code>, <code>ingest.py</code>, and <code>embedder.py</code> working. Run <code>python backend/ingest.py</code> to smoke-test ingestion. Next step: implement <code>vector_store.py</code>, then <code>rag_engine.py</code>, then <code>api.py</code> — the full pipeline will come together section by section.</p>
+    <p><strong>Current status:</strong> The full RAG pipeline is now implemented end-to-end: ingestion → ChromaDB → Groq/Gemini → FastAPI. Focus next on evaluation (RAGAS), caching, and analytics.</p>
   </div>
 </section>
 
@@ -1534,171 +1632,173 @@ retriever = vectorstore.<span class="fn">as_retriever</span>(
     <span class="sec-num">SECTION 11</span>
     <h2>Chat Memory (Conversational RAG)</h2>
   </div>
-  <p class="lead">The basic RAG forgets every message the moment it answers. Real chatbots remember the conversation. Here's how to add two-tier memory — short-term for the current session and long-term retrieval for past context.</p>
+  <p class="lead">The basic RAG forgets every message the moment it answers. This project now uses <strong>persistent SQLite memory</strong> keyed by <code>chat_id</code>, so follow-ups work across requests and even after server restarts.</p>
 
   <div class="diagram">
-    <div class="diagram-title">◈ Two-Tier Memory Architecture</div>
+    <div class="diagram-title">◈ Persistent Chat Memory (SQLite)</div>
     <div class="dia-pre">
-  SHORT-TERM MEMORY (current session)
+  CHAT_ID (per user / session)
   ─────────────────────────────────────
-  Stored in: Python list / Redis
-  Contains:  Last 6–10 messages
-  Injected:  Into every prompt automatically
-  Expires:   When session ends
+  Stored in: chat_memory.db (SQLite)
+  Contains:  Last N messages (default: 6)
+  Injected:  Into every prompt via MessagesPlaceholder
+  Persists:  Across server restarts
 
-  LONG-TERM MEMORY (across sessions)
-  ─────────────────────────────────────
-  Stored in: ChromaDB (separate collection)
-  Contains:  Embedded past conversations
-  Injected:  Top-3 semantically relevant memories
-  Expires:   Never (until manually cleared)
+  FLOW:
+  ═════
+  User message  →  /ask endpoint
+       │
+       ▼
+  get_history(chat_id)
+       │
+       ▼
+  prompt + history + context  →  LLM
+       │
+       ▼
+  add_message(chat_id, user)
+  add_message(chat_id, assistant)
 
   PROMPT STRUCTURE WITH MEMORY:
   ══════════════════════════════
   ┌─────────────────────────────────────────────────────┐
-  │ SYSTEM:  You are a helpful assistant.               │
-  │          Answer using context + conversation below. │
+  │ SYSTEM: Answer only from context + history          │
   │                                                     │
   │ CONTEXT (from RAG):                                 │
   │   [retrieved doc chunks...]                         │
   │                                                     │
-  │ RELEVANT PAST MEMORY:                               │
-  │   User previously asked about ibuprofen dosage.     │
+  │ HISTORY (SQLite):                                   │
+  │   user: What are the side effects?                  │
+  │   assistant: Nausea and dizziness are common.       │
   │                                                     │
-  │ CONVERSATION HISTORY:                               │
-  │   Human: What are the side effects?                 │
-  │   AI:    Nausea and dizziness are common.           │
-  │   Human: Can I take it daily?   ← current question │
+  │ USER: Can I take it daily?  ← follow-up             │
   └─────────────────────────────────────────────────────┘</div>
   </div>
 
   <div class="code-wrap">
     <div class="code-header">
       <div class="code-dots"><span class="dot-r"></span><span class="dot-y"></span><span class="dot-g"></span></div>
-      <span class="code-title">backend/memory.py — short-term session memory</span>
+      <span class="code-title">backend/memory.py — persistent SQLite memory</span>
       <button class="code-copy" onclick="copyCode(this)">copy</button>
     </div>
-    <pre><span class="kw">from</span> <span class="nm">collections</span> <span class="kw">import</span> defaultdict
-<span class="kw">from</span> <span class="nm">langchain.schema</span> <span class="kw">import</span> HumanMessage, AIMessage
-
-<span class="cm"># In-memory store: { chat_id: [messages] }</span>
-<span class="cm"># Replace with Redis for production multi-instance deployments</span>
-_sessions: <span class="nm">dict</span> = <span class="fn">defaultdict</span>(<span class="nm">list</span>)
-
-MAX_HISTORY = <span class="nm">10</span>  <span class="cm"># keep last 10 messages per session</span>
+    <pre><span class="kw">import</span> <span class="nm">sqlite3</span>
+<span class="kw">from</span> <span class="nm">contextlib</span> <span class="kw">import</span> closing
+<span class="kw">from</span> <span class="nm">backend.config</span> <span class="kw">import</span> settings
 
 
-<span class="kw">def</span> <span class="fn">get_history</span>(chat_id: <span class="py">str</span>) -> <span class="py">list</span>:
-    <span class="st">"""Return conversation history for a session."""</span>
-    <span class="kw">return</span> _sessions[chat_id]
+<span class="kw">def</span> <span class="fn">_connect</span>():
+    <span class="kw">return</span> sqlite3.<span class="fn">connect</span>(settings.memory_db_path)
 
 
-<span class="kw">def</span> <span class="fn">add_turn</span>(chat_id: <span class="py">str</span>, question: <span class="py">str</span>, answer: <span class="py">str</span>) -> <span class="nm">None</span>:
-    <span class="st">"""Append a human/AI turn and trim to MAX_HISTORY."""</span>
-    _sessions[chat_id].<span class="fn">append</span>(<span class="fn">HumanMessage</span>(content=question))
-    _sessions[chat_id].<span class="fn">append</span>(<span class="fn">AIMessage</span>(content=answer))
+<span class="kw">def</span> <span class="fn">init_db</span>() -> <span class="nm">None</span>:
+    <span class="st">"""Create the chat memory table if it doesn't exist."""</span>
+    <span class="kw">with</span> <span class="fn">closing</span>(<span class="fn">_connect</span>()) <span class="kw">as</span> conn:
+        conn.<span class="fn">execute</span>(<span class="st">"""
+        CREATE TABLE IF NOT EXISTS chat_messages (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            chat_id TEXT NOT NULL,
+            role TEXT NOT NULL,
+            content TEXT NOT NULL,
+            created_at TEXT DEFAULT CURRENT_TIMESTAMP
+        )
+        """</span>)
+        conn.<span class="fn">execute</span>(<span class="st">"CREATE INDEX IF NOT EXISTS idx_chat_messages_chat_id ON chat_messages(chat_id)"</span>)
+        conn.<span class="fn">commit</span>()
 
-    <span class="cm"># Keep only the last MAX_HISTORY messages</span>
-    <span class="kw">if</span> <span class="nm">len</span>(_sessions[chat_id]) > MAX_HISTORY:
-        _sessions[chat_id] = _sessions[chat_id][-MAX_HISTORY:]
+
+<span class="kw">def</span> <span class="fn">add_message</span>(chat_id: <span class="py">str</span>, role: <span class="py">str</span>, content: <span class="py">str</span>) -> <span class="nm">None</span>:
+    <span class="st">"""Persist a single chat message."""</span>
+    <span class="kw">if not</span> chat_id <span class="kw">or not</span> role <span class="kw">or</span> content <span class="kw">is</span> <span class="nm">None</span>:
+        <span class="kw">return</span>
+    <span class="kw">with</span> <span class="fn">closing</span>(<span class="fn">_connect</span>()) <span class="kw">as</span> conn:
+        conn.<span class="fn">execute</span>(<span class="st">"INSERT INTO chat_messages (chat_id, role, content) VALUES (?, ?, ?)"</span>,
+                    (chat_id, role, content))
+        conn.<span class="fn">commit</span>()
+
+
+<span class="kw">def</span> <span class="fn">get_history</span>(chat_id: <span class="py">str</span>, limit: <span class="py">int</span> | <span class="nm">None</span> = <span class="nm">None</span>) -> <span class="py">list</span>[<span class="py">tuple</span>[<span class="py">str</span>, <span class="py">str</span>]]:
+    <span class="st">"""Return the most recent messages for a chat_id, oldest-first."""</span>
+    <span class="kw">if not</span> chat_id:
+        <span class="kw">return</span> []
+    max_messages = limit <span class="kw">if</span> limit <span class="kw">is not</span> <span class="nm">None</span> <span class="kw">else</span> settings.memory_max_messages
+    <span class="kw">with</span> <span class="fn">closing</span>(<span class="fn">_connect</span>()) <span class="kw">as</span> conn:
+        rows = conn.<span class="fn">execute</span>(<span class="st">"""
+        SELECT role, content
+        FROM chat_messages
+        WHERE chat_id = ?
+        ORDER BY id DESC
+        LIMIT ?
+        """</span>, (chat_id, max_messages)).<span class="fn">fetchall</span>()
+    <span class="kw">return</span> <span class="fn">list</span>(<span class="fn">reversed</span>(rows))
 
 
 <span class="kw">def</span> <span class="fn">clear_history</span>(chat_id: <span class="py">str</span>) -> <span class="nm">None</span>:
-    <span class="st">"""Wipe a session — useful for "start over" button."""</span>
-    _sessions.<span class="fn">pop</span>(chat_id, <span class="nm">None</span>)
-
-
-<span class="kw">def</span> <span class="fn">format_history_for_prompt</span>(chat_id: <span class="py">str</span>) -> <span class="py">str</span>:
-    <span class="st">"""Convert history list into a readable string for the prompt."""</span>
-    history = <span class="fn">get_history</span>(chat_id)
-    <span class="kw">if not</span> history:
-        <span class="kw">return</span> <span class="st">"No previous conversation."</span>
-
-    lines = []
-    <span class="kw">for</span> msg <span class="kw">in</span> history:
-        role = <span class="st">"Human"</span> <span class="kw">if</span> <span class="fn">isinstance</span>(msg, HumanMessage) <span class="kw">else</span> <span class="st">"AI"</span>
-        lines.<span class="fn">append</span>(<span class="st">f"{role}: {msg.content}"</span>)
-    <span class="kw">return</span> <span class="st">"\n"</span>.<span class="fn">join</span>(lines)</pre>
+    <span class="st">"""Delete all messages for a chat_id (optional utility)."""</span>
+    <span class="kw">if not</span> chat_id:
+        <span class="kw">return</span>
+    <span class="kw">with</span> <span class="fn">closing</span>(<span class="fn">_connect</span>()) <span class="kw">as</span> conn:
+        conn.<span class="fn">execute</span>(<span class="st">"DELETE FROM chat_messages WHERE chat_id = ?"</span>, (chat_id,))
+        conn.<span class="fn">commit</span>()</pre>
   </div>
 
   <div class="code-wrap">
     <div class="code-header">
       <div class="code-dots"><span class="dot-r"></span><span class="dot-y"></span><span class="dot-g"></span></div>
-      <span class="code-title">backend/rag_engine.py — updated with memory support</span>
+      <span class="code-title">backend/rag_engine.py — memory-aware prompt + retrieval</span>
       <button class="code-copy" onclick="copyCode(this)">copy</button>
     </div>
-    <pre><span class="kw">from</span> <span class="nm">langchain_google_genai</span> <span class="kw">import</span> ChatGoogleGenerativeAI
-<span class="kw">from</span> <span class="nm">langchain_core.prompts</span> <span class="kw">import</span> ChatPromptTemplate
+    <pre><span class="kw">from</span> <span class="nm">langchain_core.messages</span> <span class="kw">import</span> HumanMessage, AIMessage
+<span class="kw">from</span> <span class="nm">langchain_core.prompts</span> <span class="kw">import</span> ChatPromptTemplate, MessagesPlaceholder
 <span class="kw">from</span> <span class="nm">langchain_core.output_parsers</span> <span class="kw">import</span> StrOutputParser
-<span class="kw">from</span> <span class="nm">vector_store</span> <span class="kw">import</span> get_vector_store
-<span class="kw">from</span> <span class="nm">memory</span> <span class="kw">import</span> get_history, add_turn, format_history_for_prompt
-<span class="kw">from</span> <span class="nm">config</span> <span class="kw">import</span> settings
+<span class="kw">from</span> <span class="nm">backend.vector_store</span> <span class="kw">import</span> get_vector_store
+<span class="kw">from</span> <span class="nm">backend.config</span> <span class="kw">import</span> settings
 
-
-<span class="cm"># ── Prompt now includes conversation history ─────────────────────</span>
-SYSTEM_PROMPT = <span class="st">"""You are a knowledgeable and helpful AI assistant.
-
+SYSTEM_PROMPT = <span class="st">"""
+You are a knowledgeable and helpful AI assistant.
 Your rules:
-1. Answer using the provided context AND the conversation history.
-2. If the answer is not in the context, say:
-   "I don't have enough information to answer that accurately."
-3. Use conversation history to understand follow-up questions.
-4. Never make up information.
-
-Context (from documents):
-{context}
-
-Conversation so far:
-{history}"""</span>
+    1. Answer ONLY using the provided context below.
+    2. If the answer is not in the context, say: "I don't have enough information."
+    3. Use conversation history to resolve follow-ups.
+    4. Never make up information.
+Context: {context}
+"""</span>
 
 prompt = <span class="fn">ChatPromptTemplate</span>.<span class="fn">from_messages</span>([
     (<span class="st">"system"</span>, SYSTEM_PROMPT),
+    <span class="fn">MessagesPlaceholder</span>(<span class="st">"history"</span>),
     (<span class="st">"human"</span>, <span class="st">"{question}"</span>)
 ])
 
 
-<span class="kw">def</span> <span class="fn">format_docs</span>(docs) -> <span class="py">str</span>:
-    <span class="kw">return</span> <span class="st">"\n\n---\n\n"</span>.<span class="fn">join</span>([doc.page_content <span class="kw">for</span> doc <span class="kw">in</span> docs])
+<span class="kw">def</span> <span class="fn">_history_to_messages</span>(rows):
+    <span class="kw">return</span> [<span class="fn">HumanMessage</span>(content=c) <span class="kw">if</span> r == <span class="st">"user"</span> <span class="kw">else</span> <span class="fn">AIMessage</span>(content=c) <span class="kw">for</span> r, c <span class="kw">in</span> rows]
 
 
-<span class="kw">def</span> <span class="fn">ask</span>(question: <span class="py">str</span>, chat_id: <span class="py">str</span> = <span class="st">"default"</span>) -> <span class="py">str</span>:
-    <span class="st">"""
-    Full RAG + memory pipeline.
-    chat_id lets you track separate conversations per user.
-    """</span>
+<span class="kw">def</span> <span class="fn">_build_retrieval_query</span>(question, history_rows):
+    <span class="kw">if not</span> history_rows:
+        <span class="kw">return</span> question
+    recent = history_rows[-<span class="nm">4</span>:]
+    history_lines = [<span class="st">f"{r}: {c}"</span> <span class="kw">for</span> r, c <span class="kw">in</span> recent]
+    history_block = <span class="st">"\n"</span>.<span class="fn">join</span>(history_lines)
+    <span class="kw">return</span> <span class="st">f"Conversation history:\n{history_block}\nFollow-up question: {question}"</span>
+
+
+<span class="kw">def</span> <span class="fn">ask</span>(question: <span class="py">str</span>, chat_history: <span class="py">list</span>[<span class="py">tuple</span>[<span class="py">str</span>, <span class="py">str</span>]] | <span class="nm">None</span> = <span class="nm">None</span>) -> <span class="py">str</span>:
     vectorstore = <span class="fn">get_vector_store</span>()
-    retriever   = vectorstore.<span class="fn">as_retriever</span>(search_kwargs={<span class="st">"k"</span>: settings.top_k})
+    retriever = vectorstore.<span class="fn">as_retriever</span>(search_kwargs={<span class="st">"k"</span>: settings.top_k})
+    retrieval_query = <span class="fn">_build_retrieval_query</span>(question, chat_history)
+    docs = retriever.<span class="fn">invoke</span>(retrieval_query)
+    context = <span class="st">"\n\n---\n\n"</span>.<span class="fn">join</span>([d.page_content <span class="kw">for</span> d <span class="kw">in</span> docs])
+    history_msgs = <span class="fn">_history_to_messages</span>(chat_history <span class="kw">or</span> [])
+    llm = <span class="fn">_build_generation_chain</span>(settings.<span class="fn">get_primary_model</span>())  <span class="cm"># provider-aware</span>
 
-    llm = <span class="fn">ChatGoogleGenerativeAI</span>(
-        model=settings.model_name,
-        temperature=settings.temperature,
-        google_api_key=settings.google_api_key,
-        convert_system_message_to_human=<span class="nm">True</span>
-    )
-
-    <span class="cm"># Retrieve docs + fetch current session history</span>
-    docs    = retriever.<span class="fn">invoke</span>(question)
-    context = <span class="fn">format_docs</span>(docs)
-    history = <span class="fn">format_history_for_prompt</span>(chat_id)
-
-    <span class="cm"># Build and run the chain</span>
-    chain  = prompt | llm | <span class="fn">StrOutputParser</span>()
-    answer = chain.<span class="fn">invoke</span>({
-        <span class="st">"context"</span>:  context,
-        <span class="st">"history"</span>:  history,
-        <span class="st">"question"</span>: question
-    })
-
-    <span class="cm"># Save this turn so the next question can reference it</span>
-    <span class="fn">add_turn</span>(chat_id, question, answer)
-
-    <span class="kw">return</span> answer</pre>
+    chain = prompt | llm | <span class="fn">StrOutputParser</span>()
+    <span class="kw">return</span> chain.<span class="fn">invoke</span>({<span class="st">"context"</span>: context, <span class="st">"history"</span>: history_msgs, <span class="st">"question"</span>: question})</pre>
   </div>
 
   <div class="code-wrap">
     <div class="code-header">
       <div class="code-dots"><span class="dot-r"></span><span class="dot-y"></span><span class="dot-g"></span></div>
-      <span class="code-title">backend/api.py — updated /ask endpoint with chat_id</span>
+      <span class="code-title">backend/api.py — memory-aware /ask endpoint</span>
       <button class="code-copy" onclick="copyCode(this)">copy</button>
     </div>
     <pre><span class="at">@app.post</span>(<span class="st">"/ask"</span>, response_model=AskResponse)
@@ -1707,8 +1807,11 @@ prompt = <span class="fn">ChatPromptTemplate</span>.<span class="fn">from_messag
         <span class="kw">raise</span> <span class="fn">HTTPException</span>(status_code=<span class="nm">400</span>, detail=<span class="st">"Question cannot be empty"</span>)
     <span class="kw">try</span>:
         start  = time.<span class="fn">time</span>()
-        answer = <span class="fn">ask</span>(req.question, chat_id=req.chat_id)  <span class="cm"># passes chat_id</span>
+        history = <span class="fn">get_history</span>(req.chat_id, limit=settings.memory_max_messages)
+        answer = <span class="fn">ask</span>(req.question, chat_history=history)
         latency = (time.<span class="fn">time</span>() - start) * <span class="nm">1000</span>
+        <span class="fn">add_message</span>(req.chat_id, <span class="st">"user"</span>, req.question)
+        <span class="fn">add_message</span>(req.chat_id, <span class="st">"assistant"</span>, answer)
         <span class="kw">return</span> <span class="fn">AskResponse</span>(answer=answer, latency_ms=<span class="fn">round</span>(latency, <span class="nm">2</span>), chat_id=req.chat_id)
     <span class="kw">except</span> QuotaExceededError <span class="kw">as</span> exc:
         <span class="kw">raise</span> <span class="fn">HTTPException</span>(status_code=<span class="nm">503</span>, detail=<span class="st">f"Quota exceeded: {exc}"</span>)
@@ -1719,20 +1822,12 @@ prompt = <span class="fn">ChatPromptTemplate</span>.<span class="fn">from_messag
     <span class="kw">except</span> RAGEngineError <span class="kw">as</span> exc:
         <span class="kw">raise</span> <span class="fn">HTTPException</span>(status_code=<span class="nm">500</span>, detail=<span class="st">f"RAG engine failed: {exc}"</span>)
     <span class="kw">except</span> <span class="fn">Exception</span> <span class="kw">as</span> exc:
-        <span class="kw">raise</span> <span class="fn">HTTPException</span>(status_code=<span class="nm">500</span>, detail=<span class="st">"Unexpected internal server error."</span>)
-
-
-<span class="at">@app.delete</span>(<span class="st">"/chat/{chat_id}"</span>)
-<span class="kw">async def</span> <span class="fn">clear_chat</span>(chat_id: <span class="py">str</span>):
-    <span class="st">"""Let the frontend offer a 'Start over' button."""</span>
-    <span class="kw">from</span> <span class="nm">memory</span> <span class="kw">import</span> clear_history
-    <span class="fn">clear_history</span>(chat_id)
-    <span class="kw">return</span> {<span class="st">"status"</span>: <span class="st">"cleared"</span>, <span class="st">"chat_id"</span>: chat_id}</pre>
+        <span class="kw">raise</span> <span class="fn">HTTPException</span>(status_code=<span class="nm">500</span>, detail=<span class="st">"Unexpected internal server error."</span>)</pre>
   </div>
 
   <div class="callout info">
     <span class="callout-icon">⚡</span>
-    <p><strong>Multi-user isolation:</strong> The <code>chat_id</code> is how you separate users. Your Next.js frontend should generate a UUID per user session (<code>crypto.randomUUID()</code>) and send it with every request. Each user gets their own independent conversation history.</p>
+    <p><strong>Multi-user isolation:</strong> The <code>chat_id</code> separates users. Your frontend should generate a UUID per session (<code>crypto.randomUUID()</code>) and send it with every request. The SQLite file (<code>chat_memory.db</code>) is local and gitignored, so conversations never leak into your repo.</p>
   </div>
 </section>
 
@@ -1794,7 +1889,7 @@ prompt = <span class="fn">ChatPromptTemplate</span>.<span class="fn">from_messag
       <span class="code-title">terminal — build and run Docker locally to test</span>
       <button class="code-copy" onclick="copyCode(this)">copy</button>
     </div>
-    <pre"><span class="cm"># Build the image</span>
+    <pre><span class="cm"># Build the image</span>
 docker build -t ai-saas-backend .
 
 <span class="cm"># Run it locally — pass your .env file</span>
@@ -1811,10 +1906,13 @@ curl http://localhost:8000/
       <span class="code-title">railway.toml — deploy to Railway in one push (free tier)</span>
       <button class="code-copy" onclick="copyCode(this)">copy</button>
     </div>
-    <pre"><span class="cm"># 1. Install Railway CLI:  npm i -g @railway/cli
+    <pre><span class="cm"># 1. Install Railway CLI:  npm i -g @railway/cli
 # 2. Login:               railway login
 # 3. Init project:        railway init
-# 4. Set secret:          railway variables set GOOGLE_API_KEY=your-key
+# 4. Set secrets:
+#    railway variables set LLM_PROVIDER=groq
+#    railway variables set GROQ_API_KEY=your-key
+#    (optional backup) railway variables set GOOGLE_API_KEY=your-key
 # 5. Deploy:              railway up</span>
 
 <span class="cm"># railway.toml (place at project root)</span>
@@ -1833,12 +1931,13 @@ restartPolicyType = <span class="st">"on_failure"</span></pre>
       <span class="code-title">.gitignore — critical files to never push</span>
       <button class="code-copy" onclick="copyCode(this)">copy</button>
     </div>
-    <pre"><span class="cm"># Secrets</span>
+    <pre><span class="cm"># Secrets</span>
 .env
 *.env
 
 <span class="cm"># Vector DB data (rebuild from documents, don't push)</span>
 chroma_db/
+chat_memory.db
 
 <span class="cm"># Python</span>
 __pycache__/
@@ -1873,7 +1972,7 @@ Thumbs.db</pre>
     <span class="sec-num">SECTION 13</span>
     <h2>Full Project Checklist</h2>
   </div>
-  <p class="lead">Two tiers below — what you can verify <strong>right now</strong> with your implemented files, and what's on the roadmap once each planned module is built.</p>
+  <p class="lead">This checklist reflects the current backend state in this repo: provider routing, vector retrieval, FastAPI endpoints, and persistent chat memory are implemented.</p>
 
   <div class="steps">
 
@@ -1882,7 +1981,7 @@ Thumbs.db</pre>
       <div class="step-content">
         <h4>Conda environment — syntax check all backend files</h4>
         <p><code>conda activate ai_saas</code>, then run:<br>
-        <code>python3 -m py_compile backend/config.py backend/ingest.py backend/embedder.py</code><br>
+        <code>python3 -m py_compile backend/*.py</code><br>
         No output = no syntax errors. Fix any errors before proceeding.</p>
       </div>
     </div>
@@ -1890,10 +1989,10 @@ Thumbs.db</pre>
     <div class="step">
       <span class="step-num" style="color:var(--green)">✓</span>
       <div class="step-content">
-        <h4>PYTHONPATH exported so imports resolve</h4>
+        <h4>Provider settings loaded correctly</h4>
         <p>Run: <code>export PYTHONPATH=$PYTHONPATH:$(pwd)/backend</code><br>
-        Verify: <code>python -c "from config import settings; print(settings.model_name)"</code><br>
-        Should print your configured primary model (default: <code>gemini-2.0-flash</code>)</p>
+        Verify: <code>python -c "from config import settings; print(settings.llm_provider, settings.get_primary_model())"</code><br>
+        Should print your active provider and primary model (default: <code>groq llama-3.3-70b-versatile</code>).</p>
       </div>
     </div>
 
@@ -1920,50 +2019,49 @@ Thumbs.db</pre>
       <span class="step-num" style="color:var(--green)">✓</span>
       <div class="step-content">
         <h4>.env created and in .gitignore</h4>
-        <p>Check <code>cat .env</code> contains <code>GOOGLE_API_KEY=your-key</code>.<br>
-        Check <code>cat .gitignore</code> contains <code>.env</code> and <code>chroma_db/</code>.<br>
+        <p>Check <code>cat .env</code> contains provider keys (<code>GROQ_API_KEY</code> and optional <code>GOOGLE_API_KEY</code>).<br>
+        Check <code>cat .gitignore</code> contains <code>.env</code>, <code>chroma_db/</code>, and <code>chat_memory.db</code>.<br>
         Run <code>git status</code> — neither should appear as a tracked file.</p>
       </div>
     </div>
 
     <div class="step">
-      <span class="step-num" style="color:var(--muted)">🔲</span>
+      <span class="step-num" style="color:var(--green)">✓</span>
       <div class="step-content">
-        <h4>Vector store ingestion runs end-to-end <span style="font-size:0.7rem;color:var(--muted);font-weight:400">(needs vector_store.py)</span></h4>
-        <p>Once <code>backend/vector_store.py</code> is implemented, run the full ingestion pipeline. The <code>chroma_db/</code> folder should appear on disk and contain persisted vectors.</p>
+        <h4>Vector store ingestion runs end-to-end</h4>
+        <p>Run <code>python backend/ingest.py</code>. The <code>chroma_db/</code> folder should appear on disk with persisted vectors and index metadata.</p>
       </div>
     </div>
 
     <div class="step">
-      <span class="step-num" style="color:var(--muted)">🔲</span>
+      <span class="step-num" style="color:var(--green)">✓</span>
       <div class="step-content">
-        <h4>Retrieval tested in isolation before LLM is added <span style="font-size:0.7rem;color:var(--muted);font-weight:400">(needs vector_store.py)</span></h4>
-        <p>Write a quick retrieval test: call <code>similarity_search_with_score()</code> on your ChromaDB collection and print the top-3 chunks. Are they relevant to your query? Fix chunking if not — don't add the LLM until retrieval looks correct.</p>
+        <h4>Retrieval tested in isolation before generation</h4>
+        <p>Run <code>python backend/query_test.py</code> and inspect top chunks + scores. If retrieval looks wrong, fix chunking/metadata before touching prompt logic.</p>
       </div>
     </div>
 
     <div class="step">
-      <span class="step-num" style="color:var(--muted)">🔲</span>
+      <span class="step-num" style="color:var(--green)">✓</span>
       <div class="step-content">
-        <h4>RAG engine returns grounded answers <span style="font-size:0.7rem;color:var(--muted);font-weight:400">(needs rag_engine.py)</span></h4>
+        <h4>RAG engine returns grounded answers</h4>
         <p>Ask a question whose answer IS in your docs — the LLM should respond from context. Ask something NOT in your docs — it should say "I don't have enough information." If it hallucinates, tighten the system prompt.</p>
       </div>
     </div>
 
     <div class="step">
-      <span class="step-num" style="color:var(--muted)">🔲</span>
+      <span class="step-num" style="color:var(--green)">✓</span>
       <div class="step-content">
-        <h4>FastAPI server running with /docs accessible <span style="font-size:0.7rem;color:var(--muted);font-weight:400">(needs api.py)</span></h4>
-        <p>Once <code>backend/api.py</code> is implemented:<br>
-        <code>uvicorn backend.api:app --reload --port 8000</code><br>
+        <h4>FastAPI server running with /docs accessible</h4>
+        <p>Run <code>bash start.sh</code> (recommended) or <code>python -m uvicorn backend.api:app --reload --port 8000</code>.<br>
         Open <code>http://localhost:8000/docs</code> and test the <code>/ask</code> endpoint.</p>
       </div>
     </div>
 
     <div class="step">
-      <span class="step-num" style="color:var(--muted)">🔲</span>
+      <span class="step-num" style="color:var(--green)">✓</span>
       <div class="step-content">
-        <h4>Chat memory working across turns <span style="font-size:0.7rem;color:var(--muted);font-weight:400">(needs memory.py + api.py)</span></h4>
+        <h4>Chat memory working across turns</h4>
         <p>Send "What are the side effects?" then follow up with "Can I take it daily?" — the second answer should use conversation context without re-explaining the first answer.</p>
       </div>
     </div>
@@ -1971,7 +2069,7 @@ Thumbs.db</pre>
     <div class="step">
       <span class="step-num" style="color:var(--muted)">🔲</span>
       <div class="step-content">
-        <h4>Evaluation run on a 20-question test set <span style="font-size:0.7rem;color:var(--muted);font-weight:400">(needs vector_store.py)</span></h4>
+        <h4>Evaluation run on a 20-question test set</h4>
         <p>Target: hit rate @3 above 75%. Any question with similarity below 0.65 — inspect the raw retrieved chunks and fix the responsible chunk boundary.</p>
       </div>
     </div>
@@ -1979,7 +2077,7 @@ Thumbs.db</pre>
     <div class="step">
       <span class="step-num" style="color:var(--muted)">🔲</span>
       <div class="step-content">
-        <h4>Docker image builds and runs cleanly <span style="font-size:0.7rem;color:var(--muted);font-weight:400">(needs api.py)</span></h4>
+        <h4>Docker image builds and runs cleanly</h4>
         <p><code>docker build -t ai-saas-backend .</code> → <code>docker run --env-file .env -p 8000:8000 ai-saas-backend</code><br>
         Confirm <code>GET /</code> returns <code>{"status":"ok"}</code>.</p>
       </div>
@@ -1988,8 +2086,8 @@ Thumbs.db</pre>
     <div class="step">
       <span class="step-num" style="color:var(--muted)">🔲</span>
       <div class="step-content">
-        <h4>CORS locked down for your frontend domain <span style="font-size:0.7rem;color:var(--muted);font-weight:400">(needs api.py)</span></h4>
-        <p>In <code>backend/api.py</code>, replace the wildcard <code>allow_origins=["*"]</code> with your exact frontend URL before going live. Wildcard is fine for local dev.</p>
+        <h4>CORS locked down for your frontend domain</h4>
+        <p>In <code>backend/api.py</code>, replace placeholder origins with your real frontend domains before going live.</p>
       </div>
     </div>
 
@@ -1997,7 +2095,7 @@ Thumbs.db</pre>
 
   <div class="callout good" style="margin-top:2rem">
     <span class="callout-icon">🚀</span>
-    <p><strong>Current status:</strong> <code>config.py</code>, <code>ingest.py</code>, <code>embedder.py</code> are implemented and testable right now. The ✓ steps above are runnable today. Build <code>vector_store.py</code> next — that unlocks retrieval, the RAG engine, and the API in sequence.</p>
+    <p><strong>Current status:</strong> Core backend is implemented end-to-end: <code>ingest.py</code> + <code>vector_store.py</code> + <code>rag_engine.py</code> + <code>api.py</code> + <code>memory.py</code>. Remaining work is mostly hardening (evaluation, deployment, CORS tightening, monitoring).</p>
   </div>
 </section>
 
@@ -2007,13 +2105,49 @@ Thumbs.db</pre>
     AI_SaaS · RAG Engineering Guide · 13 Sections · Production-Ready
   </div>
   <p style="color:var(--muted);font-size:0.8rem;margin-top:0.75rem;max-width:480px;margin-left:auto;margin-right:auto">
-    Stack: Gemini (primary + fallback) · HuggingFace BGE embeddings · ChromaDB → Pinecone · FastAPI · Next.js
+    Stack: Groq (primary) + Gemini (backup) · HuggingFace BGE embeddings · ChromaDB → Pinecone · FastAPI · Next.js
   </p>
 </footer>
 
 </main>
 
 <script>
+const THEME_STORAGE_KEY = 'rag-guide-theme';
+const themeToggle = document.getElementById('theme-toggle');
+
+function applyTheme(theme) {
+  const isLight = theme === 'light';
+  document.body.classList.toggle('light-mode', isLight);
+  if (themeToggle) {
+    themeToggle.textContent = isLight ? 'Dark mode' : 'Light mode';
+    themeToggle.setAttribute('aria-pressed', String(isLight));
+  }
+}
+
+function getInitialTheme() {
+  try {
+    const saved = localStorage.getItem(THEME_STORAGE_KEY);
+    if (saved === 'light' || saved === 'dark') return saved;
+  } catch (err) {
+    // Ignore storage access issues and fall back to system preference.
+  }
+  return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+}
+
+applyTheme(getInitialTheme());
+
+if (themeToggle) {
+  themeToggle.addEventListener('click', () => {
+    const next = document.body.classList.contains('light-mode') ? 'dark' : 'light';
+    applyTheme(next);
+    try {
+      localStorage.setItem(THEME_STORAGE_KEY, next);
+    } catch (err) {
+      // Ignore storage access issues.
+    }
+  });
+}
+
 // Progress bar
 window.addEventListener('scroll', () => {
   const pct = window.scrollY / (document.body.scrollHeight - window.innerHeight) * 100;

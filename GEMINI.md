@@ -18,14 +18,18 @@ Core application code lives in `backend/`:
 
 Data and docs:
 - `data/`: local input files used by ingestion runs.
+- `docs/`: project documentation and guides.
+- `docs/explanation.md`: detailed technical walkthrough.
+- `docs/AGENTS.md`: synchronization instructions.
+- `GEMINI.md`: repository guidelines (this file).
 - `Test_dataset/`: larger sample datasets for manual validation.
 - `learning/Vector-Database/`: reference guides and learning material.
-- `explination.md`: detailed technical walkthrough.
-- `AGENTS.md` and `GEMINI.md`: synchronized instruction files.
 
 ## Build, Test, and Development Commands
-- `bash Environment.sh`  
+- `bash scripts/Environment.sh`  
   Creates/activates `ai_saas` Conda env and installs dependencies.
+- `bash scripts/start.sh`  
+  Main entry point to start the API and auto-ingest data.
 - `conda env create -f environment.yml && conda activate ai_saas`  
   Reproducible environment setup from config.
 - `export PYTHONPATH=$PYTHONPATH:$(pwd)/backend`  

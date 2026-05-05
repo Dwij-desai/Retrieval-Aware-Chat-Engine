@@ -8,6 +8,8 @@ from fastapi.responses import Response
 from pydantic import BaseModel
 
 try:
+    from backend.config import settings
+    from backend.memory import add_message, get_history, init_db
     from backend.rag_engine import (
         ModelUnavailableError,
         QuotaExceededError,
@@ -17,8 +19,16 @@ try:
     )
     from backend.vector_store import get_vector_store
 except ModuleNotFoundError as exc:
-    if exc.name not in {"backend", "backend.rag_engine", "backend.vector_store"}:
+    if exc.name not in {
+        "backend",
+        "backend.rag_engine",
+        "backend.vector_store",
+        "backend.config",
+        "backend.memory",
+    }:
         raise
+    from config import settings
+    from memory import add_message, get_history, init_db
     from rag_engine import (
         ModelUnavailableError,
         QuotaExceededError,
@@ -36,7 +46,8 @@ logger = logging.getLogger(__name__)
 # request is fast (~300ms) instead of slow (~10s).
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    logger.info("⏳ Pre-warming embedder and vector store...")
+    logger.info("⏳ Initializing chat memory and vector store...")
+    init_db()
     t0 = time.time()
     get_vector_store()  # loads BAAI/bge-small-en-v1.5 into memory
     elapsed = round((time.time() - t0) * 1000)
@@ -87,8 +98,11 @@ async def ask_endpoint(req: AskRequest):
 
     try:
         start = time.time()
-        answer = ask(req.question)
+        history = get_history(req.chat_id, limit=settings.memory_max_messages)
+        answer = ask(req.question, chat_history=history)
         latency = (time.time() - start) * 1000
+        add_message(req.chat_id, "user", req.question)
+        add_message(req.chat_id, "assistant", answer)
         return AskResponse(
             answer=answer,
             latency_ms=round(latency, 2),

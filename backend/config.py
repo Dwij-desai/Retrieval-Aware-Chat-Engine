@@ -33,6 +33,10 @@ class Settings(BaseSettings):
     # ── GENERATION ───────────────────────────────────────────────
     temperature: float = 0.1
 
+    # ── CHAT MEMORY (persistent, SQLite) ──────────────────────────
+    memory_db_path: str = "./chat_memory.db"
+    memory_max_messages: int = 6
+
     def get_fallback_models(self) -> list[str]:
         """Return fallback model list for the active provider."""
         if self.llm_provider == "groq":
