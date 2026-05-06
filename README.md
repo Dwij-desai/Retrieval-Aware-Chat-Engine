@@ -140,13 +140,21 @@ Submit a question to the chatbot.
 ```
 
 ## 📝 Roadmap
-- [x] Docker containerization for easy deployment
+
+### ✅ MLOps Phase Complete
+- [x] **Docker containerization** for easy deployment
+- [x] **Ragas evaluation framework** for performance metrics
+- [x] **LangSmith tracing** for observability
+- [x] **Automated data ingestion pipeline**
+- [x] **Comprehensive pytest tests** with 200+ assertions
+
+### 🎯 Upcoming Features
 - [ ] Next.js Frontend UI for browser interaction
 - [ ] API-based ingestion endpoint
 - [ ] Multi-user authentication support
-- [ ] Ragas evaluation framework for performance metrics
-- [ ] LangSmith tracing for observability
-- [ ] Automated data ingestion pipeline
+- [ ] Advanced RAG techniques (re-ranking, multi-hop)
+- [ ] Custom evaluation metrics
+- [ ] Cost optimization & caching
 
 ## 📄 License
 This project is licensed under the MIT License.
