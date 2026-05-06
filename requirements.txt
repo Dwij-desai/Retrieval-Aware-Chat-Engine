@@ -152,3 +152,8 @@ ragas==0.1.12
 datasets==2.16.1
 langsmith==0.7.29
 watchdog==5.0.3
+pytest==8.0.0
+pytest-cov==4.1.0
+pytest-mock==3.12.0
+pytest-timeout==2.2.0
+pytest-xdist==3.5.0
