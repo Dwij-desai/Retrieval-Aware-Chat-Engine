@@ -1256,11 +1256,94 @@ uvicorn backend.api:app --reload --port 8000
 python3 -m py_compile backend/config.py backend/ingest.py backend/embedder.py backend/vector_store.py backend/rag_engine.py backend/api.py backend/memory.py
 ```
 
+## 15. Docker Containerization (`Dockerfile`, `docker-compose.yml`) [L1267-1330]
+
+### Why Docker Matters
+Docker ensures **environment parity** from development to production. Instead of "it works on my machine," the system runs identically everywhere. This is critical for MLOps because:
+- Consistent Python versions, dependencies, and system libraries
+- Easy deployment to cloud (AWS, GCP, Kubernetes)
+- Parallel scaling of API and vector database
+
+### Architecture
+The setup uses **docker-compose** to orchestrate two services:
+
+1. **ChromaDB Service** (port 8001)
+   - Image: `chromadb/chroma:latest`
+   - Persistent storage: Named volume `chroma_data`
+   - Health check: Verifies API responsiveness
+   - Network: Isolated `ai-chatbot-network`
+
+2. **FastAPI Service** (port 8000)
+   - Built from local `Dockerfile`
+   - Multi-stage build for optimized image size
+   - Volume mounts for dev hot-reload
+   - Depends on ChromaDB to be healthy before starting
+   - Health check: Monitors `/health` endpoint
+
+### Key Files
+- `Dockerfile`: Multi-stage build (builder + runtime)
+- `docker-compose.yml`: Service orchestration with networking
+- `.dockerignore`: Excludes unnecessary files from build context
+- `docs/DOCKER_SETUP.md`: Comprehensive setup and troubleshooting guide
+- `scripts/validate-docker.sh`: Validates Docker configuration
+
+### Quick Start
+```bash
+# Validate setup
+bash scripts/validate-docker.sh
+
+# Build and start services
+docker-compose up -d
+
+# Check status
+docker-compose ps
+
+# View logs
+docker-compose logs -f api
+
+# Stop
+docker-compose down
+```
+
+### Environment Variables
+Create `.env` in project root:
+```
+GOOGLE_API_KEY=your-key
+GROQ_API_KEY=your-key
+PROVIDER=groq
+```
+
+### Testing
+```bash
+# Health check
+curl http://localhost:8000/health
+
+# ChromaDB status
+curl http://localhost:8001/api/v1
+
+# Full RAG pipeline
+curl -X POST http://localhost:8000/ask \
+  -H "Content-Type: application/json" \
+  -d '{"question":"What is this?","session_id":"test"}'
+```
+
+### Production Notes
+- Remove `--reload` flag from uvicorn
+- Use external PostgreSQL for chat memory
+- Use managed vector DB (Qdrant Cloud, Weaviate)
+- Add Nginx reverse proxy for load balancing
+- Enable HTTPS/TLS certificates
+
+---
+
 ### Roadmap
+- [x] Add Docker support for containerized deployment
 - [ ] Add a FastAPI `/ingest` endpoint to trigger ingestion over HTTP (without CLI access)
 - [ ] Add a FastAPI `/retrieval-debug` endpoint for inspecting raw retrieved chunks
 - [ ] Build a frontend UI (e.g., Next.js) for browser-based chat interaction
-
 - [ ] Add automated `pytest` tests covering ingestion edge cases and RAG chain invocation
 - [ ] Standardize all backend imports to package-style (`backend.*`) so dual-import fallbacks can be removed
-- [ ] Add Docker support for containerized deployment
+- [ ] Implement Ragas evaluation framework for performance metrics
+- [ ] Add LangSmith tracing for observability
+- [ ] Automate data ingestion pipeline with folder watcher or Celery
+- [ ] Expand pytest coverage for edge cases

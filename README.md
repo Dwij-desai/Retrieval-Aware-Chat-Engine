@@ -34,18 +34,44 @@ A professional Retrieval-Augmented Generation (RAG) system for AI SaaS applicati
 
 ## 🛠️ Setup & Installation
 
-### 1. Prerequisites
+### Option 1: Docker (Recommended for Production)
+The easiest way to run the entire system with consistent environments:
+
+```bash
+# Validate setup
+bash scripts/validate-docker.sh
+
+# Build and start services
+docker-compose up -d
+
+# Check status
+docker-compose ps
+
+# View logs
+docker-compose logs -f api
+```
+
+**Services Started:**
+- **API**: http://localhost:8000 (with docs at /docs)
+- **ChromaDB**: http://localhost:8001/api/v1
+
+See `docs/DOCKER_SETUP.md` for detailed Docker configuration and troubleshooting.
+
+### Option 2: Local Development
+For development or systems without Docker:
+
+#### Prerequisites
 - [Conda](https://docs.conda.io/en/latest/miniconda.html) or [Miniconda](https://docs.anaconda.com/free/miniconda/index.html)
 - API Keys for [Groq](https://console.groq.com) or [Google AI Studio](https://aistudio.google.com)
 
-### 2. Environment Setup
+#### Environment Setup
 Run the setup script to create the `ai_saas` conda environment and install dependencies:
 
 ```bash
 bash scripts/Environment.sh
 ```
 
-### 3. Configuration
+### Configuration
 Create a `.env` file in the project root:
 
 ```env
@@ -59,7 +85,20 @@ MEMORY_MAX_MESSAGES=6
 
 ## 🏃 Usage
 
-### 1. Ingest Data
+### With Docker (Recommended)
+```bash
+docker-compose up -d
+```
+
+Then test the API:
+```bash
+curl http://localhost:8000/health
+curl http://localhost:8000/docs
+```
+
+### Local Development
+
+#### 1. Ingest Data
 Place your documents in the `data/` folder and run the ingestion pipeline:
 
 ```bash
@@ -67,7 +106,7 @@ conda activate ai_saas
 python backend/ingest.py
 ```
 
-### 2. Start the API Server
+#### 2. Start the API Server
 The easiest way to start the server with all paths correctly set is using the start script:
 
 ```bash
@@ -101,10 +140,13 @@ Submit a question to the chatbot.
 ```
 
 ## 📝 Roadmap
-- [ ] Next.js Frontend UI for browser interaction.
-- [ ] API-based ingestion endpoint.
-- [ ] Multi-user authentication support.
-- [ ] Docker containerization for easy deployment.
+- [x] Docker containerization for easy deployment
+- [ ] Next.js Frontend UI for browser interaction
+- [ ] API-based ingestion endpoint
+- [ ] Multi-user authentication support
+- [ ] Ragas evaluation framework for performance metrics
+- [ ] LangSmith tracing for observability
+- [ ] Automated data ingestion pipeline
 
 ## 📄 License
 This project is licensed under the MIT License.
