@@ -150,3 +150,4 @@ pandas
 openpyxl
 ragas==0.1.12
 datasets==2.16.1
+langsmith==0.7.29

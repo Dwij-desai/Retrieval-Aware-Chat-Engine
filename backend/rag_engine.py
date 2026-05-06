@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import re
+import time
 
 from langchain_core.documents import Document
 from langchain_core.messages import AIMessage, HumanMessage
@@ -13,12 +14,17 @@ try:
     # Package-style imports (e.g., `python -m backend.rag_engine`)
     from backend.config import settings
     from backend.vector_store import get_vector_store
+    from backend.observability import enable_langsmith_tracing
 except ModuleNotFoundError as exc:
-    if exc.name not in {"backend", "backend.vector_store", "backend.config"}:
+    if exc.name not in {"backend", "backend.vector_store", "backend.config", "backend.observability"}:
         raise
     # Script-style imports (e.g., `python backend/rag_engine.py`)
     from config import settings
     from vector_store import get_vector_store
+    from observability import enable_langsmith_tracing
+
+# Enable LangSmith tracing if API key is available
+enable_langsmith_tracing()
 
 # ── 1. THE PROMPT TEMPLATE ──────────────────────────────────────
 # This is where most developers get lazy. A good prompt makes
@@ -237,6 +243,7 @@ def build_rag_chain(model_name: str):
 # ── 6. MAIN ASK FUNCTION ────────────────────────────────────────
 def ask(question: str, chat_history: list[tuple[str, str]] | None = None) -> str:
     """Single entry point for the RAG chatbot with model fallback."""
+    start_time = time.time()
     context = _retrieve_context(question, chat_history)
     history_messages = _history_to_messages(chat_history)
     payload = {"context": context, "question": question, "history": history_messages}
@@ -251,7 +258,9 @@ def ask(question: str, chat_history: list[tuple[str, str]] | None = None) -> str
     for index, model_name in enumerate(candidate_models):
         chain = build_rag_chain(model_name=model_name)
         try:
-            return chain.invoke(payload)
+            result = chain.invoke(payload)
+            latency_ms = (time.time() - start_time) * 1000
+            return result
         except Exception as exc:
             last_error = exc
             error_text = str(exc)
