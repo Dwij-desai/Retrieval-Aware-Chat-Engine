@@ -34,6 +34,13 @@ A professional Retrieval-Augmented Generation (RAG) system for AI SaaS applicati
 
 ## 🛠️ Setup & Installation
 
+**👉 For step-by-step instructions, see [docs/HOW_TO_RUN.md](docs/HOW_TO_RUN.md)**
+
+Quick reference:
+```bash
+bash scripts/quickstart.sh   # Print quick reference guide
+```
+
 ### Option 1: Docker (Recommended for Production)
 The easiest way to run the entire system with consistent environments:
 
