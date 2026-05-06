@@ -1,0 +1,56 @@
+# Git files
+.git
+.gitignore
+.gitattributes
+
+# Python cache
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+*.egg-info
+.pytest_cache
+.mypy_cache
+*.egg
+dist
+build
+
+# IDEs
+.vscode
+.idea
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Node modules (for frontend)
+node_modules
+npm-debug.log
+yarn-error.log
+.next
+.nuxt
+dist
+
+# Documentation
+docs
+learning
+*.md
+
+# Data files (large datasets)
+data/
+Test_dataset/
+
+# Database files (will be created at runtime)
+*.db
+chroma_db/
+
+# Misc
+.coverage
+htmlcov
+*.zip
+*.tar.gz
