@@ -1,0 +1,56 @@
+{
+  "questions": [
+    "What is this chatbot system?",
+    "How does the RAG pipeline work?",
+    "What data formats are supported?",
+    "How is vector search performed?",
+    "What LLM providers are available?",
+    "How is chat history persisted?",
+    "What is the evaluation framework?",
+    "How do I deploy this system?"
+  ],
+  "contexts": [
+    [
+      "This is a Retrieval-Augmented Generation (RAG) chatbot system designed for AI SaaS applications. It combines document retrieval with large language models to provide accurate, context-grounded answers.",
+      "The system uses Google Gemini and Groq LLMs with ChromaDB for vector storage."
+    ],
+    [
+      "The RAG pipeline retrieves relevant documents from the vector database, then passes them as context to the LLM along with the user's question.",
+      "The LLM generates an answer grounded in the retrieved context, ensuring factual accuracy."
+    ],
+    [
+      "Supported formats include PDF, TXT, CSV, Excel (.xlsx, .xls), and JSON files.",
+      "The ingestion pipeline automatically detects file types and loads them appropriately."
+    ],
+    [
+      "ChromaDB uses embeddings from BAAI/bge-small-en-v1.5 to convert text into vector representations.",
+      "Similarity search finds the most relevant documents based on cosine distance in embedding space."
+    ],
+    [
+      "The system supports multiple LLM providers: Groq (ultra-fast, free tier available) and Google Gemini.",
+      "Providers can be switched via the PROVIDER environment variable."
+    ],
+    [
+      "Chat history is persisted in a SQLite database (chat_memory.db).",
+      "Each conversation is stored with session IDs, allowing multi-turn context awareness."
+    ],
+    [
+      "Ragas is used for evaluation, providing metrics like faithfulness, relevancy, and precision.",
+      "Golden datasets enable quantitative assessment of RAG quality."
+    ],
+    [
+      "Docker Compose orchestrates both the API and ChromaDB services.",
+      "The system can be deployed on Kubernetes or any cloud platform supporting containers."
+    ]
+  ],
+  "ground_truths": [
+    "This is a Retrieval-Augmented Generation (RAG) system for AI SaaS applications that combines document retrieval with LLMs to provide accurate, context-grounded answers.",
+    "The RAG pipeline retrieves relevant documents from a vector database, passes them as context to an LLM, and generates answers grounded in the retrieved context.",
+    "The system supports PDF, TXT, CSV, Excel, and JSON file formats for ingestion.",
+    "ChromaDB uses sentence embeddings (BAAI/bge-small-en-v1.5) to represent text as vectors, then performs similarity search using cosine distance.",
+    "The system supports Groq (ultra-fast) and Google Gemini as LLM providers, switchable via the PROVIDER environment variable.",
+    "Chat history is persisted in SQLite (chat_memory.db) with session-based storage for multi-turn conversations.",
+    "Ragas framework is used for evaluation with metrics including faithfulness, relevancy, and precision based on golden datasets.",
+    "The system is containerized with Docker Compose for easy deployment across development, staging, and production environments."
+  ]
+}
