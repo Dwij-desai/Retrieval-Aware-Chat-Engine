@@ -1,0 +1,131 @@
+Product ID,Product Name,Category,Sub Category,Price USD,Stock Quantity,Description,Supplier,Unit,Expiry Days,Discount Percentage
+G001,Organic Whole Milk,Dairy & Eggs,Milk & Cream,4.99,150,Fresh organic whole milk from local farms - 1 gallon,Fresh Dairy Co,1 Gallon,21,0
+G002,Low Fat Yogurt,Dairy & Eggs,Yogurt,3.49,200,Creamy low-fat Greek yogurt with live cultures - 32oz,YogurtPro,32 oz,14,5
+G003,Cheddar Cheese Block,Dairy & Eggs,Cheese,6.99,100,Aged sharp cheddar cheese - 1 lb,Cheese Masters,1 lb,45,0
+G004,Farm Fresh Eggs,Dairy & Eggs,Eggs,5.99,300,Free-range brown eggs - 1 dozen,Sunshine Farms,12 Count,7,0
+G005,Mozzarella String Cheese,Dairy & Eggs,Cheese,4.49,250,Low-moisture mozzarella string cheese - 12 oz,Dairyland,12 oz,30,10
+G006,Feta Cheese Crumbles,Dairy & Eggs,Cheese,5.49,120,Authentic Greek feta cheese crumbles - 8 oz,Mediterranean Foods,8 oz,35,0
+G007,Butter Unsalted,Dairy & Eggs,Butter,4.29,180,Premium unsalted butter - 1 lb,Golden Dairy,1 lb,60,0
+G008,Sour Cream,Dairy & Eggs,Cream,2.99,140,Full fat sour cream - 16 oz,Cream Valley,16 oz,21,5
+G009,Whole Wheat Bread,Bakery,Bread,3.49,120,Fresh whole wheat loaf - 24 oz,Village Bakery,1 Loaf,3,15
+G010,Sourdough Bread,Bakery,Bread,4.99,80,Artisan sourdough with tangy flavor - 20 oz,Artisan Bakers,1 Loaf,4,0
+G011,Croissants,Bakery,Pastries,5.99,60,Buttery French croissants - 4 pack,French Bakehouse,4 Pack,2,20
+G012,Blueberry Muffins,Bakery,Pastries,4.49,90,Fresh blueberry muffins - 6 pack,Morning Glory Bakery,6 Pack,2,10
+G013,Ciabatta Rolls,Bakery,Bread,3.99,100,Italian ciabatta rolls - 6 pack,European Breads,6 Pack,3,0
+G014,Bagels Assorted,Bakery,Bread,4.29,110,Mixed bagel assortment - 6 pack,Bagel Town,6 Pack,4,5
+G015,Whole Grain Cereal,Cereals & Grains,Cereals,4.99,200,High fiber whole grain cereal - 15 oz,Grain Goodness,15 oz,180,0
+G016,Honey Oat Granola,Cereals & Grains,Cereals,5.49,150,Honey roasted oat granola - 14 oz,Nature's Best,14 oz,180,5
+G017,Brown Rice,Cereals & Grains,Rice,3.49,250,Long grain brown rice - 2 lb,Rice Kingdom,2 lb,365,0
+G018,White Jasmine Rice,Cereals & Grains,Rice,4.99,200,Thai jasmine rice - 2 lb,Asian Grains,2 lb,365,0
+G019,Pasta Spaghetti,Cereals & Grains,Pasta,1.99,400,Semolina spaghetti - 1 lb,Italian Pasta Co,1 lb,365,10
+G020,Whole Wheat Pasta,Cereals & Grains,Pasta,2.49,350,Whole wheat penne pasta - 1 lb,Health Grains,1 lb,365,5
+G021,Oatmeal Steel Cut,Cereals & Grains,Oats,5.99,180,Steel cut oats - 28 oz,Morning Oats,28 oz,365,0
+G022,Quinoa White,Cereals & Grains,Grains,6.99,120,Organic white quinoa - 1 lb,Superfood Grains,1 lb,365,0
+G023,Apples Gala,Produce,Fruits,2.99,500,Crispy Gala apples - per lb,Orchard Fresh,per lb,14,0
+G024,Bananas Yellow,Produce,Fruits,0.59,600,Ripe yellow bananas - per lb,Tropical Fruits,per lb,5,0
+G025,Organic Blueberries,Produce,Fruits,5.99,200,Fresh organic blueberries - 1 pint,Berry Farms,1 pint,7,0
+G026,Strawberries,Produce,Fruits,4.49,250,Fresh red strawberries - 1 lb,Berry Paradise,1 lb,5,10
+G027,Oranges Navel,Produce,Fruits,3.99,400,Sweet navel oranges - per lb,Citrus Valley,per lb,21,0
+G028,Lemons,Produce,Fruits,1.49,300,Juicy lemons - per lb,Citrus Fresh,per lb,21,0
+G029,Grapes Red,Produce,Fruits,3.49,280,Sweet red grapes - 2 lb bag,Vineyard Fresh,2 lb bag,10,5
+G030,Watermelon,Produce,Fruits,7.99,150,Fresh watermelon - whole,Farm Fresh,Each,7,0
+G031,Broccoli,Produce,Vegetables,2.49,200,Fresh broccoli crowns - per lb,Green Valley,per lb,7,0
+G032,Carrots Orange,Produce,Vegetables,1.99,350,Fresh orange carrots - 2 lb bag,Root Vegetables,2 lb bag,21,0
+G033,Spinach Fresh,Produce,Vegetables,3.99,150,Baby spinach leaves - 5 oz,Leafy Greens,5 oz,5,10
+G034,Tomatoes Beefsteak,Produce,Vegetables,2.99,300,Ripe beefsteak tomatoes - per lb,Garden Fresh,per lb,10,0
+G035,Bell Peppers Assorted,Produce,Vegetables,1.99,400,Mixed color bell peppers - per lb,Pepper Farm,per lb,14,0
+G036,Lettuce Romaine,Produce,Vegetables,2.49,200,Fresh romaine lettuce head - each,Crisp Greens,Each,7,5
+G037,Cucumbers English,Produce,Vegetables,1.99,250,Long English cucumbers - each,Garden Picks,Each,10,0
+G038,Potatoes Russet,Produce,Vegetables,3.99,400,Russet potatoes - 5 lb bag,Potato Kingdom,5 lb bag,30,0
+G039,Sweet Potatoes,Produce,Vegetables,4.49,200,Orange sweet potatoes - 3 lb bag,Root Farm,3 lb bag,45,0
+G040,Onions Yellow,Produce,Vegetables,2.49,300,Yellow cooking onions - 3 lb bag,Allium Farm,3 lb bag,60,0
+G041,Garlic Fresh,Produce,Vegetables,3.99,150,Fresh garlic bulbs - 1 lb,Garlic Paradise,1 lb,45,0
+G042,Ground Beef 80/20,Meat & Seafood,Beef,7.99,180,Lean ground beef - 1 lb,Ranch Cattle,1 lb,3,5
+G043,Beef Ribeye Steak,Meat & Seafood,Beef,14.99,80,Premium ribeye steak - per lb,Prime Meats,per lb,5,0
+G044,Chicken Breast,Meat & Seafood,Poultry,9.99,250,Boneless skinless chicken breast - per lb,Farm Poultry,per lb,3,0
+G045,Whole Chicken,Meat & Seafood,Poultry,8.99,120,Fresh whole chicken - per lb,Poultry Paradise,per lb,3,0
+G046,Turkey Ground,Meat & Seafood,Poultry,7.49,150,Lean ground turkey - 1 lb,Thanksgiving Farm,1 lb,3,10
+G047,Salmon Fillet,Meat & Seafood,Seafood,12.99,100,Fresh Atlantic salmon - per lb,Ocean Fresh,per lb,2,0
+G048,Shrimp Jumbo,Meat & Seafood,Seafood,14.99,80,Large jumbo shrimp - 1 lb,Sea Harvest,1 lb,2,0
+G049,Tilapia Fillet,Meat & Seafood,Seafood,9.99,120,Fresh tilapia fillets - per lb,Fish Market,per lb,2,5
+G050,Pork Chops Boneless,Meat & Seafood,Pork,10.99,140,Boneless pork chops - per lb,Pork Palace,per lb,4,0
+G051,Canned Tomato Sauce,Canned & Packaged,Canned Vegetables,2.49,400,Pure tomato sauce - 15 oz,Harvest Canning,15 oz,365,0
+G052,Canned Beans Black,Canned & Packaged,Canned Vegetables,1.99,500,No salt added black beans - 15 oz,Bean Harvest,15 oz,365,5
+G053,Canned Chickpeas,Canned & Packaged,Canned Vegetables,1.79,450,Organic chickpeas - 15 oz,Legume Land,15 oz,365,0
+G054,Canned Corn Sweet,Canned & Packaged,Canned Vegetables,1.49,550,Whole kernel sweet corn - 15 oz,Corn Valley,15 oz,365,10
+G055,Peanut Butter Creamy,Canned & Packaged,Spreads,3.99,300,Natural creamy peanut butter - 18 oz,Nut Butter Co,18 oz,365,0
+G056,Almond Butter,Canned & Packaged,Spreads,5.99,200,Raw almond butter - 12 oz,Nut Paradise,12 oz,365,5
+G057,Honey Raw,Canned & Packaged,Spreads,6.49,150,Raw unfiltered honey - 12 oz,Bee Paradise,12 oz,730,0
+G058,Olive Oil Extra Virgin,Canned & Packaged,Oils,8.99,200,Premium extra virgin olive oil - 25.5 oz,Mediterranean Oil,25.5 oz,730,0
+G059,Coconut Oil Organic,Canned & Packaged,Oils,7.49,180,Organic virgin coconut oil - 14 oz,Coconut Farm,14 oz,730,0
+G060,Vegetable Oil,Canned & Packaged,Oils,4.99,250,Pure vegetable cooking oil - 51 oz,Oil Kingdom,51 oz,730,5
+G061,Soy Sauce Tamari,Canned & Packaged,Condiments,3.99,200,Gluten-free tamari soy sauce - 10 oz,Asian Flavors,10 oz,730,0
+G062,Balsamic Vinegar,Canned & Packaged,Condiments,5.99,150,Aged balsamic vinegar - 17 oz,Vinegar House,17 oz,730,0
+G063,Apple Cider Vinegar,Canned & Packaged,Condiments,4.49,180,Raw apple cider vinegar - 16 oz,Orchard Vinegar,16 oz,730,5
+G064,Ketchup Organic,Canned & Packaged,Condiments,3.49,250,Organic tomato ketchup - 20 oz,Pure Foods,20 oz,365,0
+G065,Mayonnaise,Canned & Packaged,Condiments,4.49,200,Real mayonnaise - 30 oz,Spread Maker,30 oz,180,0
+G066,Mustard Dijon,Canned & Packaged,Condiments,2.99,220,Spicy Dijon mustard - 8 oz,French Foods,8 oz,730,5
+G067,Salsa Mild,Canned & Packaged,Condiments,2.49,300,Fresh tomato salsa - 16 oz,Salsa Express,16 oz,90,0
+G068,Pasta Sauce Marinara,Canned & Packaged,Sauces,2.99,350,Classic marinara pasta sauce - 24 oz,Italian Kitchen,24 oz,365,10
+G069,Coconut Milk Full Fat,Canned & Packaged,International,3.99,250,Rich coconut milk - 13.5 oz,Thai Kitchen,13.5 oz,365,0
+G070,Tomato Paste,Canned & Packaged,Canned Vegetables,2.99,200,Concentrated tomato paste - 6 oz,Paste Perfect,6 oz,365,0
+G071,Coffee Ground Medium Roast,Beverages,Coffee,7.99,180,Medium roast ground coffee - 12 oz,Coffee Paradise,12 oz,90,0
+G072,Coffee Whole Bean Dark,Beverages,Coffee,8.99,150,Dark roast whole bean - 12 oz,Roast Master,12 oz,90,5
+G073,Tea Black Assorted,Beverages,Tea,4.99,120,Black tea assortment - 40 bags,Tea House,40 bags,365,0
+G074,Green Tea Organic,Beverages,Tea,5.99,100,Organic green tea - 20 bags,Tea Organic,20 bags,365,0
+G075,Orange Juice Fresh,Beverages,Juice,3.99,200,Fresh squeezed orange juice - 64 oz,Juice Press,64 oz,14,5
+G076,Almond Milk Unsweetened,Beverages,Milk Alternatives,2.99,250,Unsweetened almond milk - 64 oz,Milk Makers,64 oz,14,0
+G077,Coconut Water,Beverages,Juice,3.49,180,Pure coconut water - 11.5 oz,Tropical Drinks,11.5 oz,30,0
+G078,Sparkling Water,Beverages,Water,4.99,400,Sparkling water 12 pack - 12 oz cans,Bubble Water,12 Pack,365,10
+G079,Chocolate Chips Semi Sweet,Baking & Spices,Baking Supplies,3.49,220,Semi-sweet chocolate chips - 12 oz,Choco Delight,12 oz,365,0
+G080,Vanilla Extract Pure,Baking & Spices,Baking Supplies,6.99,100,Pure vanilla extract - 4 oz,Spice Master,4 oz,730,0
+G081,Flour All Purpose,Baking & Spices,Baking Supplies,2.99,300,All purpose flour - 5 lb bag,Flour Mill,5 lb bag,180,5
+G082,Baking Powder,Baking & Spices,Baking Supplies,1.99,150,Double acting baking powder - 10 oz,Rise Perfect,10 oz,365,0
+G083,Baking Soda,Baking & Spices,Baking Supplies,1.49,180,Pure baking soda - 16 oz,Pure Soda,16 oz,365,0
+G084,Salt Sea Fine,Baking & Spices,Spices,2.49,200,Fine sea salt - 26 oz,Salt Works,26 oz,730,0
+G085,Black Pepper Ground,Baking & Spices,Spices,3.99,120,Ground black pepper - 2.3 oz,Pepper Mill,2.3 oz,365,0
+G086,Cinnamon Ground,Baking & Spices,Spices,4.49,100,Ground cinnamon - 1.5 oz,Spice House,1.5 oz,365,5
+G087,Garlic Powder,Baking & Spices,Spices,3.49,110,Garlic powder - 3.3 oz,Powder Palace,3.3 oz,365,0
+G088,Italian Seasoning,Baking & Spices,Spices,3.99,130,Italian herb blend - 1.5 oz,Herb Garden,1.5 oz,365,0
+G089,Paprika Smoked,Baking & Spices,Spices,3.99,95,Smoked paprika - 2.6 oz,Spice Quest,2.6 oz,365,0
+G090,Cumin Ground,Baking & Spices,Spices,3.49,105,Ground cumin - 1.8 oz,Spice World,1.8 oz,365,5
+G091,Cookies Chocolate Chip,Snacks,Cookies,3.99,220,Chocolate chip cookies - 12 oz pack,Cookie Jar,12 oz,90,10
+G092,Granola Bars Honey Nut,Snacks,Bars,2.99,280,Honey nut granola bars - 5 pack,Bar Paradise,5 Pack,180,0
+G093,Potato Chips Sea Salt,Snacks,Chips,2.49,350,Sea salt potato chips - 5.5 oz,Crisp Foods,5.5 oz,120,5
+G094,Tortilla Chips,Snacks,Chips,2.99,300,Corn tortilla chips - 13 oz,Chip Nation,13 oz,90,0
+G095,Almonds Raw,Snacks,Nuts,6.99,150,Raw whole almonds - 1 lb,Nut Paradise,1 lb,365,0
+G096,Cashews Roasted,Snacks,Nuts,7.99,120,Roasted cashews - 10 oz,Nut Kingdom,10 oz,365,5
+G097,Mixed Nuts,Snacks,Nuts,5.99,130,Mixed roasted nuts - 14 oz,Nut Blend,14 oz,365,0
+G098,Trail Mix,Snacks,Nuts,4.99,160,Sweet trail mix - 12 oz,Mix Master,12 oz,180,10
+G099,Popcorn Kernels,Snacks,Popcorn,2.99,200,Popcorn kernels for popping - 2 lb,Pop Corn Farm,2 lb,365,0
+G100,Dark Chocolate 70%,Snacks,Chocolate,3.99,180,Dark chocolate 70% cacao - 3.5 oz,Choco Paradise,3.5 oz,180,0
+G101,Ice Cream Vanilla,Frozen,Ice Cream,4.99,200,Vanilla ice cream - 1 quart,Freeze Factory,1 Quart,365,5
+G102,Frozen Pizza Pepperoni,Frozen,Frozen Meals,6.99,150,Frozen pepperoni pizza - 14 oz,Pizza Freeze,14 oz,180,0
+G103,Frozen Vegetables Mixed,Frozen,Frozen Vegetables,2.99,250,Mixed frozen vegetables - 16 oz,Frozen Farm,16 oz,365,10
+G104,Frozen Berries,Frozen,Frozen Fruits,4.99,180,Frozen mixed berries - 12 oz,Berry Freeze,12 oz,365,0
+G105,Frozen Fries Crinkle Cut,Frozen,Frozen Potatoes,2.49,300,Crinkle cut french fries - 32 oz,Fry Master,32 oz,180,5
+G106,Frozen Fish Fillets,Frozen,Frozen Meals,8.99,120,Breaded fish fillets - 18 oz,Fish Freeze,18 oz,180,0
+G107,Frozen Chicken Nuggets,Frozen,Frozen Meals,5.99,160,Chicken nuggets - 20 oz,Nugget Paradise,20 oz,180,10
+G108,Frozen Shrimp Cooked,Frozen,Frozen Seafood,9.99,100,Cooked shrimp - 12 oz,Shrimp Freeze,12 oz,180,0
+G109,Yogurt Frozen Cups,Frozen,Frozen Desserts,3.49,220,Frozen yogurt cups - 4 pack,Yogurt Freeze,4 Pack,180,5
+G110,Sorbet Berry,Frozen,Frozen Desserts,4.99,140,Mixed berry sorbet - 1 pint,Sorbet Paradise,1 Pint,365,0
+G111,Energy Drink Tropical,Beverages,Energy Drinks,2.99,400,Tropical energy drink - 16 oz can,Energy Boost,16 oz,180,0
+G112,Sports Drink Orange,Beverages,Sports Drinks,1.99,450,Orange sports drink - 20 oz bottle,Sport Hydrate,20 oz,365,10
+G113,Kombucha Ginger,Beverages,Kombucha,3.99,150,Ginger kombucha - 16 oz bottle,Probiotic Life,16 oz,60,0
+G114,Protein Powder Vanilla,Health & Wellness,Supplements,24.99,100,Whey protein powder vanilla - 2 lb,Muscle Maker,2 lb,365,5
+G115,Vitamin C Supplement,Health & Wellness,Vitamins,8.99,120,Vitamin C tablets - 60 count,Wellness Shop,60 Count,365,0
+G116,Omega 3 Fish Oil,Health & Wellness,Supplements,12.99,80,Fish oil omega 3 - 100 soft gels,Health Source,100 Count,365,0
+G117,Multivitamin,Health & Wellness,Vitamins,9.99,110,Daily multivitamin - 90 tablets,Vita Works,90 Count,365,10
+G118,Magnesium Supplement,Health & Wellness,Supplements,10.99,90,Magnesium supplement - 60 tablets,Mineral Health,60 Count,365,0
+G119,Protein Bars,Health & Wellness,Bars,2.49,250,Protein energy bars - 5 pack,Protein Paradise,5 Pack,180,5
+G120,Meal Replacement Shake,Health & Wellness,Shakes,3.99,180,Meal replacement drink mix - 14 oz,Nutrition Plus,14 oz,180,0
+G121,Oat Bran,Cereals & Grains,Oats,3.99,140,Oat bran cereal - 16 oz,Grain Health,16 oz,365,0
+G122,Flax Seeds,Cereals & Grains,Seeds,5.49,110,Ground flax seeds - 16 oz,Seed Paradise,16 oz,365,5
+G123,Chia Seeds,Cereals & Grains,Seeds,6.99,95,Raw chia seeds - 12 oz,Super Seeds,12 oz,365,0
+G124,Sunflower Seeds,Cereals & Grains,Seeds,4.49,130,Raw sunflower seeds - 1 lb,Seed Farm,1 lb,365,0
+G125,Pumpkin Seeds,Cereals & Grains,Seeds,5.99,100,Raw pumpkin seeds - 10 oz,Seed Harvest,10 oz,365,10
+G126,Beef Jerky Original,Meat & Seafood,Processed Meat,7.99,140,Original beef jerky - 3 oz,Jerky Master,3 oz,180,5
+G127,Turkey Bacon,Meat & Seafood,Processed Meat,5.99,120,Smoked turkey bacon - 6 oz,Bacon House,6 oz,14,0
+G128,Ham Sliced Deli,Meat & Seafood,Deli Meat,4.99,160,Honey ham sliced - per lb,Deli Counter,per lb,7,0
+G129,Pepperoni Sliced,Meat & Seafood,Deli Meat,5.49,130,Spicy pepperoni slices - per lb,Meat Market,per lb,14,5
+G130,Roast Beef Deli,Meat & Seafood,Deli Meat,6.99,100,Premium roast beef - per lb,Deli Paradise,per lb,7,0

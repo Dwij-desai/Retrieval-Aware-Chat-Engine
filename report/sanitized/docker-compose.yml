@@ -1,0 +1,71 @@
+version: '3.9'
+
+services:
+  # ChromaDB Vector Database
+  chroma:
+    image: chromadb/chroma:latest
+    container_name: ai-chatbot-chroma
+    ports:
+      - "8001:8000"
+    environment:
+      IS_PERSISTENT: "true"
+      PERSIST_DIRECTORY: /data
+    volumes:
+      - chroma_data:/data
+    networks:
+      - ai-chatbot-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+
+  # FastAPI Backend
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ai-chatbot-api
+    ports:
+      - "8000:8000"
+    environment:
+      # Required: Set GOOGLE_API_KEY as environment variable or in .env
+      GOOGLE_API_KEY: ${GOOGLE_API_KEY:-}
+      # Optional: Configure provider (groq or gemini)
+      PROVIDER: ${PROVIDER:-groq}
+      # Optional: Groq API Key
+      GROQ_API_KEY: ${GROQ_API_KEY:-}
+      # ChromaDB client configuration
+      CHROMA_HOST: chroma
+      CHROMA_PORT: 8000
+      CHROMA_PERSIST_DIR: /app/chroma_db
+      # Python settings
+      PYTHONUNBUFFERED: "1"
+      PYTHONPATH: /app
+    volumes:
+      - ./backend:/app/backend
+      - ./data:/app/data
+      - ./chroma_db:/app/chroma_db
+      - ./chat_memory.db:/app/chat_memory.db
+    networks:
+      - ai-chatbot-network
+    depends_on:
+      chroma:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+    restart: unless-stopped
+
+volumes:
+  chroma_data:
+    driver: local
+
+networks:
+  ai-chatbot-network:
+    driver: bridge

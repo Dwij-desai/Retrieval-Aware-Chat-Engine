@@ -1,0 +1,118 @@
+{
+  "store_info": {
+    "name": "SuperMart Grocery Store",
+    "description": "Full-service grocery and marketplace with fresh produce, organic items, and everyday essentials",
+    "total_products": 130,
+    "categories": 13
+  },
+  "departments": [
+    {
+      "department": "Dairy & Eggs",
+      "description": "Fresh dairy products including milk, cheese, eggs, and cream",
+      "items": 9,
+      "popular_items": ["Organic Whole Milk", "Farm Fresh Eggs", "Cheddar Cheese Block"]
+    },
+    {
+      "department": "Bakery",
+      "description": "Fresh baked goods including bread, pastries, bagels and muffins",
+      "items": 6,
+      "popular_items": ["Sourdough Bread", "Croissants", "Whole Wheat Bread"]
+    },
+    {
+      "department": "Cereals & Grains",
+      "description": "Rice, pasta, grains, cereal and healthy breakfast options",
+      "items": 12,
+      "popular_items": ["Brown Rice", "Pasta Spaghetti", "Honey Oat Granola"]
+    },
+    {
+      "department": "Fresh Produce",
+      "description": "Fresh fruits, vegetables, and organic options",
+      "items": 20,
+      "popular_items": ["Bananas Yellow", "Carrots Orange", "Tomatoes Beefsteak", "Apples Gala"]
+    },
+    {
+      "department": "Meat & Seafood",
+      "description": "Fresh meat, poultry, and seafood - premium quality",
+      "items": 15,
+      "popular_items": ["Chicken Breast", "Ground Beef 80/20", "Salmon Fillet"]
+    },
+    {
+      "department": "Canned & Packaged Foods",
+      "description": "Canned vegetables, oils, sauces, spreads, and pantry essentials",
+      "items": 20,
+      "popular_items": ["Canned Tomato Sauce", "Olive Oil Extra Virgin", "Peanut Butter Creamy"]
+    },
+    {
+      "department": "Beverages",
+      "description": "Coffee, tea, juice, milk alternatives, and drinks",
+      "items": 13,
+      "popular_items": ["Coffee Ground Medium Roast", "Almond Milk Unsweetened", "Orange Juice Fresh"]
+    },
+    {
+      "department": "Baking & Spices",
+      "description": "Baking supplies, spices, seasonings, and flavor ingredients",
+      "items": 18,
+      "popular_items": ["Flour All Purpose", "Cinnamon Ground", "Vanilla Extract Pure"]
+    },
+    {
+      "department": "Snacks",
+      "description": "Chips, cookies, nuts, granola bars, and healthy snacks",
+      "items": 10,
+      "popular_items": ["Almonds Raw", "Trail Mix", "Cookies Chocolate Chip"]
+    },
+    {
+      "department": "Frozen Foods",
+      "description": "Frozen vegetables, meals, ice cream, and frozen fruits",
+      "items": 10,
+      "popular_items": ["Ice Cream Vanilla", "Frozen Pizza Pepperoni", "Frozen Fish Fillets"]
+    },
+    {
+      "department": "Health & Wellness",
+      "description": "Supplements, vitamins, protein powders, and wellness products",
+      "items": 8,
+      "popular_items": ["Protein Powder Vanilla", "Multivitamin", "Omega 3 Fish Oil"]
+    },
+    {
+      "department": "Deli & Processed Meats",
+      "description": "Sliced meats, processed meats, bacon, and deli items",
+      "items": 5,
+      "popular_items": ["Ham Sliced Deli", "Beef Jerky Original", "Turkey Bacon"]
+    }
+  ],
+  "promotions": [
+    {
+      "id": "PROMO001",
+      "name": "Fresh Produce Sale",
+      "discount": "15% off all fresh produce",
+      "valid_until": "2026-05-14",
+      "departments": ["Fresh Produce"]
+    },
+    {
+      "id": "PROMO002",
+      "name": "Dairy Week",
+      "discount": "Buy 1 Get 1 50% off",
+      "valid_until": "2026-05-10",
+      "departments": ["Dairy & Eggs"]
+    },
+    {
+      "id": "PROMO003",
+      "name": "Pantry Essentials",
+      "discount": "10% off all canned and packaged foods",
+      "valid_until": "2026-05-12",
+      "departments": ["Canned & Packaged Foods"]
+    },
+    {
+      "id": "PROMO004",
+      "name": "Healthy Living",
+      "discount": "20% off health and wellness products",
+      "valid_until": "2026-05-15",
+      "departments": ["Health & Wellness"]
+    }
+  ],
+  "shopping_guide": {
+    "peak_hours": "2 PM - 5 PM (avoid crowds 9 AM - 12 PM)",
+    "delivery_options": "Free delivery on orders over $50 (within 5 miles)",
+    "loyalty_program": "Earn 1 point per dollar spent. Redeem for discounts",
+    "payment_methods": "Cash, Credit, Debit, Apple Pay, Google Pay, Store Card"
+  }
+}

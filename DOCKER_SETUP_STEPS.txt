@@ -1,0 +1,141 @@
+DOCKER SETUP - STEP BY STEP
+===========================
+For AI Grocery Store Chatbot
+
+---
+
+STEP 1: INSTALL DOCKER (5 minutes)
+----------------------------------
+
+Run this command:
+  brew install --cask docker
+
+Wait for installation, then open Docker:
+  open /Applications/Docker.app
+
+Wait 45-60 seconds for Docker to start (menu bar icon says "running")
+
+Verify:
+  docker --version
+  docker-compose --version
+
+You should see version numbers (Docker 24.0.0+, docker-compose 2.18.0+)
+
+
+STEP 2: CHECK YOUR API KEY (1 minute)
+-------------------------------------
+
+Check .env file:
+  cat /Volumes/MacDisk_1TB/AI_SAAS\(ChatBot\)\ copy/.env
+
+Must have GROQ_API_KEY set to real value (not "your_actual_groq_key_here")
+
+If you need a key:
+  1. Go to: https://console.groq.com/keys
+  2. Sign up and create API key
+  3. Copy the key
+  4. Update .env with real key
+
+
+STEP 3: START DOCKER SERVICES (2 minutes)
+------------------------------------------
+
+Navigate to project:
+  cd /Volumes/MacDisk_1TB/AI_SAAS\(ChatBot\)\ copy
+
+Start services:
+  docker-compose up -d
+
+Check status:
+  docker-compose ps
+
+Both services should show "Up" status
+
+
+STEP 4: VERIFY SERVICES (2 minutes)
+-----------------------------------
+
+Test API health:
+  curl http://localhost:8000/health
+
+Test ChromaDB:
+  curl http://localhost:8001/api/v1
+
+Both should return data without errors
+
+
+STEP 5: OPEN FRONTEND (1 minute)
+--------------------------------
+
+Open in browser:
+  http://localhost:5173
+
+You should see terminal-style chatbot UI
+
+
+STEP 6: TEST IT! (2 minutes)
+----------------------------
+
+Try asking these questions:
+
+  "What dairy products do you have?"
+  "Do you have salmon? How much?"
+  "What products cost under $5?"
+  "Show me all spices"
+  "What's the price of chicken breast?"
+
+You should get real answers from grocery database!
+
+
+USEFUL DOCKER COMMANDS
+======================
+
+View logs:
+  docker-compose logs -f api
+
+Stop all services:
+  docker-compose down
+
+Restart services:
+  docker-compose restart
+
+Check status:
+  docker-compose ps
+
+Full cleanup (remove volumes):
+  docker-compose down -v
+
+
+SERVICES & URLS
+===============
+
+Frontend:         http://localhost:5173
+Backend API:      http://localhost:8000
+API Documentation: http://localhost:8000/docs
+ChromaDB:         http://localhost:8001
+
+
+TROUBLESHOOTING
+===============
+
+Docker not running?
+  → Open /Applications/Docker.app
+  → Wait for menu bar icon to say "running"
+
+Port 8000 already in use?
+  → Check: lsof -i :8000
+  → Kill process: kill -9 [PID]
+
+Services won't start?
+  → Check logs: docker-compose logs api
+  → Verify API key in .env
+
+API returns 502 error?
+  → Check GROQ_API_KEY is set to real value
+  → Restart API: docker-compose restart api
+
+
+THAT'S IT!
+==========
+
+Your AI Grocery Store Chatbot is now running in production-ready Docker!

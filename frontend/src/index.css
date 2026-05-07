@@ -1,0 +1,218 @@
+:root {
+  color-scheme: dark;
+  --bg-dark: #0f0f11;
+  --bg-panel: #161618;
+  --bg-gradient: linear-gradient(145deg, #1e1e22, #0f0f11);
+  --text-main: #e0e0e0;
+  --text-dim: #888;
+  --border-industrial: 1px solid rgba(255, 255, 255, 0.08);
+  --accent-glow: rgba(0, 150, 255, 0.15);
+  --metallic-border: linear-gradient(to bottom, #444, #222);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--bg-gradient);
+  background-attachment: fixed;
+  color: var(--text-main);
+  font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+  height: 100vh;
+  overflow: hidden;
+}
+
+code, pre, textarea, .chat-message {
+  font-family: 'JetBrains Mono', 'Menlo', 'Monaco', monospace;
+  letter-spacing: -0.02em;
+}
+
+#root {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+}
+
+/* --- Industrial Sidebar --- */
+.sidebar {
+  width: 260px;
+  background: rgba(22, 22, 24, 0.8);
+  backdrop-filter: blur(20px);
+  border-right: var(--border-industrial);
+  display: flex;
+  flex-direction: column;
+  z-index: 10;
+}
+
+.new-chat-btn {
+  margin: 20px;
+  padding: 10px;
+  background: transparent;
+  color: var(--text-main);
+  border: 1px solid #444;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.new-chat-btn:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: #666;
+  box-shadow: 0 0 15px var(--accent-glow);
+}
+
+.chat-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 10px;
+}
+
+.chat-item {
+  padding: 12px 15px;
+  font-size: 13px;
+  color: var(--text-dim);
+  cursor: pointer;
+  margin-bottom: 4px;
+  transition: all 0.2s ease;
+  border-left: 2px solid transparent;
+}
+
+.chat-item:hover {
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text-main);
+}
+
+.chat-item.active {
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+  border-left-color: #0096ff;
+  box-shadow: inset 10px 0 20px -10px var(--accent-glow);
+}
+
+/* --- Main Viewport --- */
+.main-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: transparent;
+}
+
+.header {
+  height: 50px;
+  padding: 0 30px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: var(--border-industrial);
+  background: rgba(15, 15, 17, 0.4);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  color: var(--text-dim);
+  text-transform: uppercase;
+}
+
+.chat-log {
+  flex: 1;
+  overflow-y: auto;
+  padding: 40px 15%;
+}
+
+/* --- Messaging --- */
+.message-wrapper {
+  margin-bottom: 30px;
+  animation: fadeIn 0.4s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.message-label {
+  font-size: 10px;
+  color: #555;
+  margin-bottom: 8px;
+  font-weight: 800;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.chat-message {
+  font-size: 15px;
+  line-height: 1.7;
+  white-space: pre-wrap;
+  color: #ccc;
+}
+
+.user-message {
+  color: #fff;
+  padding-left: 20px;
+  border-left: 1px solid #444;
+}
+
+.assistant-message {
+  background: rgba(255, 255, 255, 0.02);
+  padding: 20px;
+  border: var(--border-industrial);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+}
+
+/* --- Input Area --- */
+.input-dock {
+  padding: 30px 15% 50px;
+  background: linear-gradient(to top, var(--bg-dark), transparent);
+}
+
+.input-container {
+  display: flex;
+  background: #000;
+  border: 1px solid #333;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.03);
+  transition: border-color 0.3s ease;
+}
+
+.input-container:focus-within {
+  border-color: #555;
+  box-shadow: 0 0 20px var(--accent-glow);
+}
+
+textarea {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: #fff;
+  padding: 15px;
+  font-size: 14px;
+  resize: none;
+  outline: none;
+  min-height: 24px;
+}
+
+/* --- Scrollbar --- */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #333; }
+::-webkit-scrollbar-thumb:hover { background: #444; }
+
+.cursor {
+  display: inline-block;
+  width: 8px;
+  height: 16px;
+  background: #0096ff;
+  box-shadow: 0 0 10px #0096ff;
+  vertical-align: middle;
+  animation: blink 1s step-end infinite;
+}
+
+@keyframes blink {
+  from, to { opacity: 0; }
+  50% { opacity: 1; }
+}

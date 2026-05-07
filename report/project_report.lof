@@ -1,0 +1,16 @@
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {3.1}{\ignorespaces Layered architecture used by the AI SaaS chatbot platform.}}{12}{figure.3.1}%
+\contentsline {figure}{\numberline {3.2}{\ignorespaces End-to-end runtime sequence for one production query.}}{13}{figure.3.2}%
+\contentsline {figure}{\numberline {3.3}{\ignorespaces Container deployment topology from \texttt {docker-compose.yml}.}}{14}{figure.3.3}%
+\contentsline {figure}{\numberline {3.4}{\ignorespaces Continuous MLOps lifecycle used to operate and improve the platform.}}{17}{figure.3.4}%
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {4.1}{\ignorespaces Screenshot Slot 1: Frontend Landing Page}}{26}{figure.4.1}%
+\contentsline {figure}{\numberline {4.2}{\ignorespaces Screenshot Slot 2: Chat Interaction}}{26}{figure.4.2}%
+\contentsline {figure}{\numberline {4.3}{\ignorespaces Screenshot Slot 3: API Documentation}}{27}{figure.4.3}%
+\contentsline {figure}{\numberline {4.4}{\ignorespaces Screenshot Slot 4: Docker Services}}{27}{figure.4.4}%
+\contentsline {figure}{\numberline {4.5}{\ignorespaces Screenshot Slot 5: LangSmith and Evaluation}}{27}{figure.4.5}%
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\addvspace {10\p@ }
