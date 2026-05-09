@@ -164,4 +164,11 @@ Submit a question to the chatbot.
 - [ ] Cost optimization & caching
 
 ## 📄 License
-This project is licensed under the MIT License.
+
+**Proprietary License**
+
+Copyright (c) 2026 Dwij Desai. All Rights Reserved.
+
+This software and all associated files are proprietary. No permission is granted to any person or organization to use, copy, modify, merge, publish, distribute, sublicense, sell, or create derivative works from this software, in whole or in part, in any form.
+
+See the [LICENSE](LICENSE) file for the full license text.
