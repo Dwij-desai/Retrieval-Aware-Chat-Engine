@@ -4,7 +4,7 @@ __pycache__/
 .DS_Store
 chroma_db/
 chat_memory.db
-docs/work-till-now.md
+docs/
 .idea/
 .vscode/
 *.pyc

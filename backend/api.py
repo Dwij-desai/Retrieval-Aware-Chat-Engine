@@ -60,7 +60,7 @@ app = FastAPI(title="AI SaaS RAG API", version="1.0.0", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "https://yourdomain.com"],
+    allow_origins=["http://localhost:3000", "http://localhost:5173", "https://yourdomain.com"],
     allow_methods=["*"],
     allow_headers=["*"],
 )
